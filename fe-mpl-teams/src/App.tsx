@@ -1,9 +1,14 @@
 import AppRoutes from './routes/index.tsx'
 
 
+
 function App() {
   return (
-   <AppRoutes/>
+    <div>
+
+      <AppRoutes />
+    </div>  
+
   )
 }
 
