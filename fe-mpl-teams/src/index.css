@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+
+
+/* Automatically applied by NavLink */
+a.active {
+  color: blue;
+  font-weight: bold;
+}
