@@ -43,6 +43,12 @@ func CreateEvent(c *gin.Context) {
 		return
 	}
 
+	var phase models.Phase
+	if err := config.DB.First(&phase, input.PhaseID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Phase not found"})
+		return
+	}
+
 	event := models.Event{
 		Name:    input.Name,
 		Type:    input.Type,
@@ -78,6 +84,11 @@ func UpdateEvent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Invalid input",
 			"error":   err.Error()})
+		return
+	}
+	var phase models.Phase
+	if err := config.DB.First(&phase, input.PhaseID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Phase not found"})
 		return
 	}
 

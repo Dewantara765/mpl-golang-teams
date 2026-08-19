@@ -40,6 +40,12 @@ func CreatePhase(c *gin.Context) {
 		return
 	}
 
+	var tournament models.Tournament
+	if err := config.DB.First(&tournament, input.TournamentID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Tournament not found"})
+		return
+	}
+
 	phase := models.Phase{
 		Name:         input.Name,
 		TournamentID: input.TournamentID,
@@ -73,6 +79,12 @@ func UpdatePhase(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Invalid input",
 			"error":   err.Error()})
+		return
+	}
+
+	var tournament models.Tournament
+	if err := config.DB.First(&tournament, input.TournamentID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Tournament not found"})
 		return
 	}
 
