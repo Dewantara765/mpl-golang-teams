@@ -55,7 +55,7 @@ export default function Team() {
                                 <td className="border border-gray-300 px-4 py-2">{team.short_name}</td>
                                 <td className="border border-gray-300 px-4 py-2">
                                     {team.logo && (
-                                        <img src={`http://localhost:8080/${team.logo}`} alt={`${team.name} logo`} className="w-20 object-cover" />
+                                        <img src={`http://localhost:8080/${team.logo}`} alt={`${team.name} logo`} className="w-15 object-cover" />
                                     )}
                                 </td>
                                 <td className="border border-gray-300 px-4 py-2">
