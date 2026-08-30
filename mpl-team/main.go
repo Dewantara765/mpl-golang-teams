@@ -2,7 +2,6 @@ package main
 
 import (
 	"mpl-team/config"
-	"mpl-team/models"
 	"mpl-team/routes"
 
 	"time"
@@ -26,11 +25,6 @@ func main() {
 
 	// Connect database and run migration
 	config.ConnectDatabase()
-	config.DB.AutoMigrate(&models.Team{})
-	config.DB.AutoMigrate(&models.Tournament{})
-	config.DB.AutoMigrate(&models.Phase{})
-	config.DB.AutoMigrate(&models.Event{})
-	config.DB.AutoMigrate(&models.Match{})
 
 	routes.SetupRoutes(r)
 	r.Static("/uploads", "./uploads")

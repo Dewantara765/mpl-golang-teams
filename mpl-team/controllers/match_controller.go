@@ -4,6 +4,7 @@ import (
 	"mpl-team/config"
 	"mpl-team/models"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,33 +44,79 @@ func CreateMatch(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
+	// Home and away team cannot be the same
 	if input.HomeTeamID == input.AwayTeamID {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Home team and away team cannot be the same"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Home team and away team cannot be the same",
+		})
 		return
 	}
 
+	// Validate scores
+	if input.HomeScore != nil && *input.HomeScore < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Home score cannot be negative",
+		})
+		return
+	}
+
+	if input.AwayScore != nil && *input.AwayScore < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Away score cannot be negative",
+		})
+		return
+	}
+
+	// Validate date
+	if _, err := time.Parse("2006-01-02", input.Date); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid date format, use YYYY-MM-DD",
+		})
+		return
+	}
+
+	// Validate time
+	if _, err := time.Parse("15:04:05", input.Time); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid time format, use HH:MM:SS",
+		})
+		return
+	}
+
+	// Check home team
 	var homeTeam models.Team
 	if err := config.DB.First(&homeTeam, input.HomeTeamID).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Home team not found"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Home team not found",
+		})
 		return
 	}
 
+	// Check away team
 	var awayTeam models.Team
 	if err := config.DB.First(&awayTeam, input.AwayTeamID).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Away team not found"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Away team not found",
+		})
 		return
 	}
 
+	// Check event
 	var event models.Event
 	if err := config.DB.First(&event, input.EventID).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Event not found"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Event not found",
+		})
 		return
 	}
 
+	// Create match
 	match := models.Match{
 		HomeTeamID: input.HomeTeamID,
 		AwayTeamID: input.AwayTeamID,
@@ -81,15 +128,29 @@ func CreateMatch(c *gin.Context) {
 	}
 
 	if err := config.DB.Create(&match).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create match"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to create match",
+		})
 		return
 	}
 
-	config.DB.Preload("HomeTeam").Preload("AwayTeam").First(&match, match.ID)
+	// Load relationships
+	if err := config.DB.
+		Preload("HomeTeam").
+		Preload("AwayTeam").
+		Preload("Event").
+		First(&match, match.ID).Error; err != nil {
 
-	c.JSON(http.StatusCreated, gin.H{"data": match})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to load created match",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"data": match,
+	})
 }
-
 func UpdateMatch(c *gin.Context) {
 	id := c.Param("id")
 	var match models.Match

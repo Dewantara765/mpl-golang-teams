@@ -40,6 +40,7 @@ func CreateTournament(c *gin.Context) {
 		Name      string `json:"name" binding:"required"`
 		StartDate string `json:"start_date" binding:"required"`
 		EndDate   string `json:"end_date" binding:"required"`
+		Slug      string `json:"slug" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -51,6 +52,7 @@ func CreateTournament(c *gin.Context) {
 		Name:      input.Name,
 		StartDate: input.StartDate,
 		EndDate:   input.EndDate,
+		Slug:      input.Slug,
 	}
 
 	if err := config.DB.Create(&tournament).Error; err != nil {
@@ -78,6 +80,7 @@ func UpdateTournament(c *gin.Context) {
 		Name      string `json:"name"`
 		StartDate string `json:"start_date"`
 		EndDate   string `json:"end_date"`
+		Slug      string `json:"slug"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -91,6 +94,7 @@ func UpdateTournament(c *gin.Context) {
 	tournament.Name = input.Name
 	tournament.StartDate = input.StartDate
 	tournament.EndDate = input.EndDate
+	tournament.Slug = input.Slug
 
 	if err := config.DB.Save(&tournament).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

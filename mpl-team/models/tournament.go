@@ -5,5 +5,6 @@ type Tournament struct {
 	Name      string  `json:"name" gorm:"not null"`
 	StartDate string  `json:"start_date" gorm:"not null"`
 	EndDate   string  `json:"end_date" gorm:"not null"`
+	Slug      string  `json:"slug" gorm:"unique;not null"`
 	Phases    []Phase `json:"phases" gorm:"foreignKey:TournamentID"`
 }

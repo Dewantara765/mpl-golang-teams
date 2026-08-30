@@ -33,6 +33,7 @@ func CreatePhase(c *gin.Context) {
 	var input struct {
 		Name         string `json:"name" binding:"required"`
 		TournamentID uint   `json:"tournament_id" binding:"required"`
+		Slug         string `json:"slug" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -49,6 +50,7 @@ func CreatePhase(c *gin.Context) {
 	phase := models.Phase{
 		Name:         input.Name,
 		TournamentID: input.TournamentID,
+		Slug:         input.Slug,
 	}
 
 	if err := config.DB.Create(&phase).Error; err != nil {
@@ -73,6 +75,7 @@ func UpdatePhase(c *gin.Context) {
 	var input struct {
 		Name         string `json:"name"`
 		TournamentID uint   `json:"tournament_id"`
+		Slug         string `json:"slug"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -90,6 +93,7 @@ func UpdatePhase(c *gin.Context) {
 
 	phase.Name = input.Name
 	phase.TournamentID = input.TournamentID
+	phase.Slug = input.Slug
 
 	if err := config.DB.Save(&phase).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
