@@ -22,11 +22,15 @@ func FindTournaments(c *gin.Context) {
 	})
 }
 
-func FindTournamentByID(c *gin.Context) {
-	id := c.Param("id")
+func FindTournamentBySlug(c *gin.Context) {
+	slug := c.Param("slug")
 	var tournament models.Tournament
 
-	if err := config.DB.Preload("Phases").First(&tournament, id).Error; err != nil {
+	if err := config.DB.Preload("Phases").
+		Preload("Phases.Events").
+		Preload("Phases.Events.Matches").
+		Preload("Phases.Events.Matches.HomeTeam").
+		Preload("Phases.Events.Matches.AwayTeam").First(&tournament, "slug = ?", slug).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Tournament not found"})
 		return
 	}
