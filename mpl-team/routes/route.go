@@ -20,6 +20,7 @@ func SetupRoutes(router *gin.Engine) {
 	{
 		tournament.GET("", controllers.FindTournaments)
 		tournament.GET("/:slug", controllers.FindTournamentBySlug)
+		tournament.GET("/db/:id", controllers.FindTournamentByID)
 		tournament.POST("", controllers.CreateTournament)
 		tournament.PUT("/:id", controllers.UpdateTournament)
 		tournament.DELETE("/:id", controllers.DeleteTournament)

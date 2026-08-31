@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import { Link } from 'react-router-dom';
 import {api} from '../../services/api.ts';
 export default function TournamentIndex() { 
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -7,7 +8,7 @@ export default function TournamentIndex() {
         name: string;
         start_date: string;
         end_date: string;
-        
+        slug: string;
     }
     useEffect(() => {
         document.title = 'Tournament Index';
@@ -37,7 +38,8 @@ export default function TournamentIndex() {
                     <tbody>
                         {tournaments.map((tournament) => (
                             <tr key={tournament.id} className="font-normal">
-                                <td className="border border-gray-300 px-4 py-2">{tournament.name}</td>
+                                <td className="border border-gray-300 px-4 py-2">
+                                    <Link className="text-blue-500 underline" to={`/tournament/${tournament.slug}`}>{tournament.name}</Link></td>
                                 <td className="border border-gray-300 px-4 py-2">{tournament.start_date}</td>
                                 <td className="border border-gray-300 px-4 py-2">{tournament.end_date}</td>
                             </tr>
