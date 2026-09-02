@@ -6,6 +6,7 @@ import (
 	"mpl-team/models"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,10 @@ import (
 // GET /teams
 func FindTeams(c *gin.Context) {
 	var teams []models.Team
-	config.DB.Find(&teams)
+	if err := config.DB.Find(&teams).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch teams"})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": teams})
 }
 
@@ -32,34 +36,77 @@ func FindTeamByID(c *gin.Context) {
 
 // POST /teams
 func CreateTeam(c *gin.Context) {
-	name := c.PostForm("name")
-	short_name := c.PostForm("short_name")
+	name := strings.TrimSpace(c.PostForm("name"))
+	shortName := strings.TrimSpace(c.PostForm("short_name"))
 
-	if name == "" || short_name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
-		return
+	errors := make(map[string]string)
+
+	if name == "" {
+		errors["name"] = "Name is required"
+	}
+
+	if shortName == "" {
+		errors["short_name"] = "Short name is required"
 	}
 
 	file, err := c.FormFile("logo")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to upload logo"})
+		errors["logo"] = "Logo is required"
+	}
+
+	if len(errors) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"errors": errors,
+		})
 		return
 	}
 
-	filename := fmt.Sprintf("uploads/%d-%s", time.Now().Unix(), file.Filename)
+	// Pastikan folder uploads tersedia
+	if err := os.MkdirAll("uploads", os.ModePerm); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"errors": map[string]string{
+				"logo": "Failed to create upload directory",
+			},
+		})
+		return
+	}
+
+	filename := fmt.Sprintf(
+		"uploads/%d-%s",
+		time.Now().UnixNano(),
+		file.Filename,
+	)
+
 	if err := c.SaveUploadedFile(file, filename); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to save logo"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"errors": map[string]string{
+				"logo": "Failed to save logo",
+			},
+		})
 		return
 	}
 
 	team := models.Team{
 		Name:      name,
-		ShortName: short_name,
+		ShortName: shortName,
 		Logo:      filename,
 	}
 
-	config.DB.Create(&team)
-	c.JSON(http.StatusCreated, gin.H{"data": team})
+	if err := config.DB.Create(&team).Error; err != nil {
+		// Hapus file jika database gagal
+		os.Remove(filename)
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"errors": map[string]string{
+				"team": "Failed to create team",
+			},
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"data": team,
+	})
 }
 
 func UpdateTeam(c *gin.Context) {
@@ -71,15 +118,15 @@ func UpdateTeam(c *gin.Context) {
 		return
 	}
 
-	name := c.PostForm("name")
-	short_name := c.PostForm("short_name")
+	name := strings.TrimSpace(c.PostForm("name"))
+	shortName := strings.TrimSpace(c.PostForm("short_name"))
 
 	if name != "" {
 		team.Name = name
 	}
 
-	if short_name != "" {
-		team.ShortName = short_name
+	if shortName != "" {
+		team.ShortName = shortName
 	}
 
 	file, err := c.FormFile("logo")
@@ -88,15 +135,18 @@ func UpdateTeam(c *gin.Context) {
 			os.Remove(team.Logo)
 		}
 
-		newPath := fmt.Sprintf("uploads/%d-%s", time.Now().Unix(), file.Filename)
+		newPath := fmt.Sprintf("uploads/%d-%s", time.Now().UnixNano(), file.Filename)
 		if err := c.SaveUploadedFile(file, newPath); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to save logo"})
+			c.JSON(http.StatusBadRequest, gin.H{"errors": map[string]string{"logo": "Failed to save logo"}})
 			return
 		}
 		team.Logo = newPath
 	}
 
-	config.DB.Save(&team)
+	if err := config.DB.Save(&team).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"errors": map[string]string{"team": "Failed to update team"}})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": team})
 }
 
@@ -113,6 +163,9 @@ func DeleteTeam(c *gin.Context) {
 		os.Remove(team.Logo)
 	}
 
-	config.DB.Delete(&team)
+	if err := config.DB.Delete(&team).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete team"})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "Team deleted"})
 }

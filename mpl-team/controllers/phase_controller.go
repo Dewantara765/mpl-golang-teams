@@ -10,7 +10,9 @@ import (
 
 func FindPhases(c *gin.Context) {
 	var phases []models.Phase
-	if err := config.DB.Preload("Events").Find(&phases).Error; err != nil {
+	if err := config.DB.
+		Preload("Tournament").
+		Preload("Events").Find(&phases).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to retrieve phases"})
 		return
@@ -36,14 +38,25 @@ func CreatePhase(c *gin.Context) {
 		Slug         string `json:"slug" binding:"required"`
 	}
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	errors := make(map[string]string)
+
+	if input.Name == "" {
+		errors["name"] = "Name is required"
+	}
+
+	if input.Slug == "" {
+		errors["slug"] = "Slug is required"
 	}
 
 	var tournament models.Tournament
 	if err := config.DB.First(&tournament, input.TournamentID).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Tournament not found"})
+		errors["tournament_id"] = "Tournament not found"
+	}
+
+	if len(errors) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"errors": errors,
+		})
 		return
 	}
 
@@ -55,8 +68,10 @@ func CreatePhase(c *gin.Context) {
 
 	if err := config.DB.Create(&phase).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to create phase",
-			"error":   err.Error()})
+			"errors": map[string]string{
+				"phase": "Failed to create phase",
+			},
+		})
 		return
 	}
 
@@ -76,13 +91,6 @@ func UpdatePhase(c *gin.Context) {
 		Name         string `json:"name"`
 		TournamentID uint   `json:"tournament_id"`
 		Slug         string `json:"slug"`
-	}
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid input",
-			"error":   err.Error()})
-		return
 	}
 
 	var tournament models.Tournament

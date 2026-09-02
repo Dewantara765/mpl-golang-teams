@@ -7,6 +7,7 @@ export default function TournamentCreate() {
     const [slug, setSlug]= useState<string>("")
     const [start_date, setStartDate]= useState<string>("")
     const [end_date, setEndDate]= useState<string>("")
+    const [errors, setErrors] = useState<{name?: string, slug?: string, start_date?: string, end_date?: string}>({})
     const navigate = useNavigate()
     useEffect(() => {
         document.title = "Create Tournament"
@@ -21,8 +22,10 @@ export default function TournamentCreate() {
 
             );
             navigate("/dashboard/tournament")
-        } catch (error) {
-            console.log("failed to add tournament", error);
+        } catch (error : any) {
+            if (error.response && error.response.data && error.response.data.errors) {
+                setErrors(error.response.data.errors)
+            }
         }
     }
 
@@ -34,22 +37,29 @@ export default function TournamentCreate() {
                     <label htmlFor="name" className="block w-40 text-md font-medium text-gray-700">Name</label>
                     <input value={name} type="text" id="name" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
                     onChange={(e) => setName(e.target.value)} />
+                    {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                 </div>
                 <div className="flex gap-2 items-center">
                     <label htmlFor="slug" className="block w-40 text-md font-medium text-gray-700">Slug</label>
                     <input value={slug} type="text" id="slug" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
                     onChange={(e) => setSlug(e.target.value)} />
+                    {errors.slug && <p className="text-red-500 text-sm">{errors.slug}</p>}
                 </div>
+                
                 <div className="flex gap-2 items-center">
                     <label htmlFor="startDate" className="block w-40 text-md font-medium text-gray-700">Start Date</label>
                     <input value={start_date} type="date" id="startDate" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
                     onChange={(e) => setStartDate(e.target.value)} />
+                    {errors.start_date && <p className="text-red-500 text-sm">{errors.start_date}</p>}
                 </div>
+                
                 <div className="flex gap-2 items-center">
                     <label htmlFor="endDate" className="block w-40 text-md font-medium text-gray-700">End Date</label>
                     <input value={end_date} type="date" id="endDate" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
                     onChange={(e) => setEndDate(e.target.value)} />
+                    {errors.end_date && <p className="text-red-500 text-sm">{errors.end_date}</p>}
                 </div>
+                
                 
                 <button type="submit" className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Add Tournament</button>
             </form>

@@ -7,9 +7,10 @@ export default function TeamEdit() {
     const navigate = useNavigate()
     const [team, setTeam] = useState<[] | null>(null)
     const [name, setName] = useState<string>("")
-    const [shortName, setShortName] = useState<string>("")
+    const [short_name, setShortName] = useState<string>("")
     const [logo, setLogo] = useState<File | null>(null)
     const [preview, setPreview] = useState<string | null>(null)
+    const [errors, setErrors] = useState<{ name?: string; short_name?: string }>({})
 
     const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -28,8 +29,10 @@ export default function TeamEdit() {
                 setShortName(response.data.data.short_name)
                 setLogo(`http://localhost:8080/${response.data.data.logo}`)
                 setPreview(`http://localhost:8080/${response.data.data.logo}`)
-            } catch (error) {
-                console.error("Error fetching team:", error)
+            } catch (error : any) {
+                if (error.response && error.response.data && error.response.data.errors) {
+                setErrors(error.response.data.errors)
+            }
             }
         }
         fetchTeam()
@@ -39,7 +42,7 @@ export default function TeamEdit() {
         event.preventDefault()
         const formData = new FormData()
         formData.append("name", name)
-        formData.append("short_name", shortName)
+        formData.append("short_name", short_name)
         if (logo) {
             formData.append("logo", logo)
         }
@@ -51,26 +54,28 @@ export default function TeamEdit() {
                 },
             })
             navigate("/dashboard/team")
-        } catch (error) {
-            console.error("Error updating team:", error)
-            alert(error.response?.data?.message ?? "Failed to update team.")
+        } catch (error : any) {
+                if (error.response && error.response.data && error.response.data.errors) {
+                setErrors(error.response.data.errors)
+            }
         }
     }
 
     return (
         <div className="p-4">
-            <h1>Edit Team</h1>
-            <p>This is the team edit page. Team ID: {id}</p>
+            <p className="text-lg font-bold">Edit Team</p>
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
                 <div className="flex gap-2 items-center">
                     <label htmlFor="name" className="block w-40 text-md font-medium text-gray-700">Team Name</label>
                     <input value={name} type="text" id="name" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
                     onChange={(e) => setName(e.target.value)} />
+                    {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                 </div>
                 <div className="flex gap-2 items-center">
                     <label htmlFor="shortName" className="block w-40 text-md font-medium text-gray-700">Short Name</label>
-                    <input value={shortName} type="text" id="shortName" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <input value={short_name} type="text" id="shortName" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
                     onChange={(e) => setShortName(e.target.value)} />
+                    {errors.short_name && <p className="text-red-500 text-sm">{errors.short_name}</p>}
                 </div>
                 <div className="flex gap-2 items-center">
                     <label htmlFor="logo" className="block w-40 text-md font-medium text-gray-700">Logo</label>

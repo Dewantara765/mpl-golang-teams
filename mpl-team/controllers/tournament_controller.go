@@ -63,8 +63,28 @@ func CreateTournament(c *gin.Context) {
 		Slug      string `json:"slug" binding:"required"`
 	}
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	errors := make(map[string]string)
+
+	if input.Name == "" {
+		errors["name"] = "Name is required"
+	}
+
+	if input.StartDate == "" {
+		errors["start_date"] = "Start date is required"
+	}
+
+	if input.EndDate == "" {
+		errors["end_date"] = "End date is required"
+	}
+
+	if input.Slug == "" {
+		errors["slug"] = "Slug is required"
+	}
+
+	if len(errors) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"errors": errors,
+		})
 		return
 	}
 
@@ -77,8 +97,10 @@ func CreateTournament(c *gin.Context) {
 
 	if err := config.DB.Create(&tournament).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to create tournament",
-			"error":   err.Error()})
+			"errors": map[string]string{
+				"tournament": "Failed to create tournament",
+			},
+		})
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{

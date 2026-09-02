@@ -8,6 +8,7 @@ export default function DashboardLayout(){
                     <div className="mb-4 font-bold text-lg">Dashboard</div>
                     <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/team">Team</NavLink>
                     <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/tournament">Tournament</NavLink>
+                    <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/phase">Phase</NavLink>
                 </div>
             </div>
             <div className="w-7/8 h-screen">
