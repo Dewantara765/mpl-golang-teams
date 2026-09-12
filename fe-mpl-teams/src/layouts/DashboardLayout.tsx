@@ -9,6 +9,8 @@ export default function DashboardLayout(){
                     <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/team">Team</NavLink>
                     <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/tournament">Tournament</NavLink>
                     <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/phase">Phase</NavLink>
+                    <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/event">Event</NavLink>
+                    <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/match">Match</NavLink>
                 </div>
             </div>
             <div className="w-7/8 h-screen">

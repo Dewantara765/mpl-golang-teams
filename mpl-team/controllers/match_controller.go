@@ -11,7 +11,8 @@ import (
 
 func FindMatches(c *gin.Context) {
 	var matches []models.Match
-	if err := config.DB.Preload("HomeTeam").Preload("AwayTeam").Find(&matches).Error; err != nil {
+	if err := config.DB.Preload("HomeTeam").Preload("AwayTeam").Preload("Event").
+		Preload("Event.Phase").Preload("Event.Phase.Tournament").Find(&matches).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to retrieve matches"})
 		return
