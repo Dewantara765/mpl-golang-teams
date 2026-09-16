@@ -10,7 +10,7 @@ import (
 
 func FindEvents(c *gin.Context) {
 	var events []models.Event
-	if err := config.DB.Preload("Phase").Preload("Matches").Find(&events).Error; err != nil {
+	if err := config.DB.Preload("Phase").Preload("Phase.Tournament").Preload("Matches").Find(&events).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to retrieve events"})
 		return

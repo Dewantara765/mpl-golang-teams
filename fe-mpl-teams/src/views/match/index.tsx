@@ -76,10 +76,18 @@ export default function MatchIndex() {
                                 <div key={event.id}>
                                     <h2>{event.name}</h2>
                                     {event.matches.map((match) => (
-                                        <div key={match.id} className='border w-50 p-2 font-normal m-2'>
-                                            <p>{match.home_team.short_name} {match.home_score}-{match.away_score} {match.away_team.short_name}
-                                            </p>
-                                            <p>{formatDate(match.date)} {formatTime(match.time)}</p>
+                                        <div key={match.id} className='border w-60 p-2 font-normal m-2'>
+                                            <div className="flex items-center">
+                                                <img className="w-10 object-contain" src={`http://localhost:8080/${match.home_team.logo}`} alt={match.home_team.short_name} />
+                                                <div className="ml-2">{match.home_team.short_name}</div>
+                                                <div className="ml-2">{match.home_score}-{match.away_score}</div>
+                                                <div className="ml-2">{match.away_team.short_name}</div>
+                                                <img className="ml-2 w-10 object-contain" src={`http://localhost:8080/${match.away_team.logo}`} alt={match.away_team.short_name} />
+                                            </div>
+                                            <div className="mt-2">
+                                                <div>{formatDate(match.date)} {formatTime(match.time)} WIB</div>
+                                                
+                                            </div>
                                         </div>
                                     )
 

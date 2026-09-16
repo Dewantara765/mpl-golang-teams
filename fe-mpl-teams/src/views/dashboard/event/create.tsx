@@ -47,20 +47,20 @@ export default function EventCreate() {
             <h1 className="text-xl font-semibold">Create Event</h1>
             <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="name" className="block w-40 text-md font-medium text-gray-700">Name</label>
-                    <input value={name} type="text" id="name" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <label htmlFor="name" className="block input-label">Name</label>
+                    <input value={name} type="text" id="name" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setName(e.target.value)} />
                     {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                 </div>
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="type" className="block w-40 text-md font-medium text-gray-700">Type</label>
-                    <input value={type} type="text" id="type" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <label htmlFor="type" className="block input-label">Type</label>
+                    <input value={type} type="text" id="type" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setType(e.target.value)} />
                     {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
                 </div>
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="phase_id" className="block w-40 text-md font-medium text-gray-700">Phase</label>
-                    <select value={phase_id} id="phase_id" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <label htmlFor="phase_id" className="block input-label">Phase</label>
+                    <select value={phase_id} id="phase_id" className="mt-1 block w-50 select-field" 
                     onChange={(e) => setPhaseId(Number(e.target.value))}>
                         <option value={0}>Select a phase</option>
                         {phases.map((phase) => (

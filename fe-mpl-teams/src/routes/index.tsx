@@ -19,6 +19,9 @@ import DashboardEventIndex from '../views/dashboard/event/index.tsx'
 import EventCreate from '../views/dashboard/event/create.tsx'
 import EventEdit from '../views/dashboard/event/edit.tsx'
 import DashboardMatchIndex from '../views/dashboard/match/index.tsx'
+import CreateMatch from '../views/dashboard/match/create.tsx'
+import EditMatch from '../views/dashboard/match/edit.tsx'
+
     
 export default function AppRoutes() {
   return (
@@ -43,6 +46,8 @@ export default function AppRoutes() {
         <Route path="/dashboard/event/create" element={<EventCreate/>}/>
         <Route path="/dashboard/event/edit/:id" element={<EventEdit/>}/>
         <Route path="/dashboard/match" element={<DashboardMatchIndex/>}/>
+        <Route path="/dashboard/match/create" element={<CreateMatch/>}/>
+        <Route path="/dashboard/match/edit/:id" element={<EditMatch/>}/>
       </Route>
     </Routes>
   )

@@ -66,20 +66,20 @@ export default function TeamEdit() {
             <p className="text-lg font-bold">Edit Team</p>
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="name" className="block w-40 text-md font-medium text-gray-700">Team Name</label>
-                    <input value={name} type="text" id="name" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <label htmlFor="name" className="block input-label">Team Name</label>
+                    <input value={name} type="text" id="name" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setName(e.target.value)} />
                     {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                 </div>
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="shortName" className="block w-40 text-md font-medium text-gray-700">Short Name</label>
-                    <input value={short_name} type="text" id="shortName" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <label htmlFor="shortName" className="block input-label">Short Name</label>
+                    <input value={short_name} type="text" id="shortName" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setShortName(e.target.value)} />
                     {errors.short_name && <p className="text-red-500 text-sm">{errors.short_name}</p>}
                 </div>
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="logo" className="block w-40 text-md font-medium text-gray-700">Logo</label>
-                    <input type="file" id="logo" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <label htmlFor="logo" className="block input-label">Logo</label>
+                    <input type="file" id="logo" className="mt-1 block w-50 input-field" accept="image/*"
                     onChange={handleLogoChange} />
                 </div>
                 {preview && (

@@ -10,6 +10,7 @@ type Match struct {
 	AwayScore  *int   `json:"away_score"`
 	Date       string `json:"date" gorm:"type:date;not null"`
 	Time       string `json:"time" gorm:"type:time;not null"`
+	BestOf     *int   `json:"best_of" gorm:"default:1"`
 	EventID    uint   `json:"event_id" gorm:"not null" `
 	Event      Event  `json:"event" gorm:"foreignKey:EventID"`
 }

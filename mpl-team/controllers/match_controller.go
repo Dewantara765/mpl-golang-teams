@@ -40,6 +40,7 @@ func CreateMatch(c *gin.Context) {
 		EventID    uint   `json:"event_id" binding:"required"`
 		HomeScore  *int   `json:"home_score"`
 		AwayScore  *int   `json:"away_score"`
+		BestOf     *int   `json:"best_of"`
 		Date       string `json:"date" binding:"required"`
 		Time       string `json:"time" binding:"required"`
 	}
@@ -126,6 +127,7 @@ func CreateMatch(c *gin.Context) {
 		AwayScore:  input.AwayScore,
 		Date:       input.Date,
 		Time:       input.Time,
+		BestOf:     input.BestOf,
 	}
 
 	if err := config.DB.Create(&match).Error; err != nil {
@@ -169,6 +171,7 @@ func UpdateMatch(c *gin.Context) {
 		Time       *string `json:"time"`
 		HomeScore  *int    `json:"home_score"`
 		AwayScore  *int    `json:"away_score"`
+		BestOf     *int    `json:"best_of"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -213,6 +216,7 @@ func UpdateMatch(c *gin.Context) {
 	match.Date = *input.Date
 
 	match.Time = *input.Time
+	match.BestOf = input.BestOf
 
 	if err := config.DB.Save(&match).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update match"})

@@ -34,28 +34,28 @@ export default function TournamentCreate() {
             <p className="text-xl font-semibold">Add tournament page.</p>
             <form onSubmit={handleSubmit}   className="mt-4 space-y-4">
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="name" className="block w-40 text-md font-medium text-gray-700">Name</label>
-                    <input value={name} type="text" id="name" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <label htmlFor="name" className="block w-40 input-label">Name</label>
+                    <input value={name} type="text" id="name" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setName(e.target.value)} />
                     {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                 </div>
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="slug" className="block w-40 text-md font-medium text-gray-700">Slug</label>
-                    <input value={slug} type="text" id="slug" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <label htmlFor="slug" className="block w-40 input-label">Slug</label>
+                    <input value={slug} type="text" id="slug" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setSlug(e.target.value)} />
                     {errors.slug && <p className="text-red-500 text-sm">{errors.slug}</p>}
                 </div>
                 
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="startDate" className="block w-40 text-md font-medium text-gray-700">Start Date</label>
-                    <input value={start_date} type="date" id="startDate" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <label htmlFor="startDate" className="block w-40 input-label">Start Date</label>
+                    <input value={start_date} type="date" id="startDate" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setStartDate(e.target.value)} />
                     {errors.start_date && <p className="text-red-500 text-sm">{errors.start_date}</p>}
                 </div>
                 
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="endDate" className="block w-40 text-md font-medium text-gray-700">End Date</label>
-                    <input value={end_date} type="date" id="endDate" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <label htmlFor="endDate" className="block w-40 input-label">End Date</label>
+                    <input value={end_date} type="date" id="endDate" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setEndDate(e.target.value)} />
                     {errors.end_date && <p className="text-red-500 text-sm">{errors.end_date}</p>}
                 </div>

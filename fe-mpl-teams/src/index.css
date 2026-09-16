@@ -7,3 +7,15 @@ a.active {
   color: blue;
   font-weight: bold;
 }
+
+.input-field {
+  @apply border border-gray-500 rounded-md bg-slate-300;
+}
+
+.select-field {
+  @apply border border-gray-500 rounded-md bg-slate-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 ;
+}
+
+.input-label {
+  @apply block w-40 font-medium;
+}

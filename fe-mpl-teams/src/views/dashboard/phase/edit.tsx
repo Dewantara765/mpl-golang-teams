@@ -63,21 +63,21 @@ export default function PhaseEdit() {
             <p className="text-xl font-semibold">Edit phase page.</p>
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="name" className="block w-40 text-md font-medium text-gray-700">Name</label>
-                    <input value={name} type="text" id="name" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <label htmlFor="name" className="block input-label">Name</label>
+                    <input value={name} type="text" id="name" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setName(e.target.value)} />
                     
                 </div>
                 
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="slug" className="block w-40 text-md font-medium text-gray-700">Slug</label>
-                    <input value={slug} type="text" id="slug" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                    <label htmlFor="slug" className="block input-label">Slug</label>
+                    <input value={slug} type="text" id="slug" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setSlug(e.target.value)} />
                     
                 </div>
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="tournaments" className="block w-40 text-md font-medium text-gray-700">Tournament</label>
-                    <select name="tournaments" id="tournaments" value={tournament_id}
+                    <label htmlFor="tournaments" className="block input-label">Tournament</label>
+                    <select name="tournaments" id="tournaments" value={tournament_id} className="mt-1 block w-50 select-field"
                     onChange={(e) => setTournamentId(Number(e.target.value))}>
                         <option value="">Pilih Tournament..</option>
                     {tournaments.map((tournament) => (
