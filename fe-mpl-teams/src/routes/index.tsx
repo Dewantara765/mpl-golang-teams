@@ -7,7 +7,7 @@ import Team from '../views/dashboard/team/index.tsx'
 import TeamCreate from '../views/dashboard/team/create.tsx'
 import TeamEdit from '../views/dashboard/team/edit.tsx'
 import TournamentIndex from '../views/tournament/index.tsx'
-import MatchIndex from '../views/match/index.tsx'
+import MatchIndex from '../views/phase/index.tsx'
 import DashboardTournamentIndex from '../views/dashboard/tournament/index.tsx'
 import TournamentEdit from '../views/dashboard/tournament/edit.tsx'
 import TournamentCreate from '../views/dashboard/tournament/create.tsx'
@@ -31,6 +31,7 @@ export default function AppRoutes() {
         <Route path="*" element={<NotFound />} />
         <Route path="/tournament" element={<TournamentIndex />} />
         <Route path="/tournament/:slug" element={<MatchIndex />} />
+        
       </Route>
       <Route element={<DashboardLayout />}>
         <Route path="/dashboard/team" element={<Team />} />

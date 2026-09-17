@@ -1,8 +1,12 @@
 import {useEffect, useState} from "react";
 import { api } from "../../../services/api";
-import { Link } from "react-router-dom";
+import { data, Link, useSearchParams } from "react-router-dom";
 export default function DashboardMatchIndex(){
     const [matches, setMatches] = useState<Match[]>([]);
+    
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(7);
+    const [totalPage, setTotalPage] = useState(0);
 
     const formatDate = (date: string) => {
         const formattedDate = date.slice(0,10)
@@ -37,18 +41,20 @@ export default function DashboardMatchIndex(){
             }
         },
     }
+
     useEffect(() => {
         document.title = "Dashboard - Match Index"
         const fetchMatches = async () => {
             try {
-                const response = await api.get("/matches");
+                const response = await api.get(`/matches?page=${page}&pageSize=${pageSize}`);
                 setMatches(response.data.data);
+                setTotalPage(response.data.totalPage);
             } catch (error) {
                 console.error("Error fetching matches:", error);
             }
         };
         fetchMatches();
-    },[])
+    },[page])
 
     const handleDelete = async (id: number) => {
         try {
@@ -59,6 +65,8 @@ export default function DashboardMatchIndex(){
             console.error("Error deleting match:", error);
         }
     }
+
+
     return (
         <div className='p-4'>
             <p className="font-semibold text-xl mb-3">Match Index Page</p>
@@ -105,6 +113,38 @@ export default function DashboardMatchIndex(){
                         )}
                     </tbody>
                 </table>
+                <div className="flex gap-2 mt-4">
+    <button
+        disabled={page === 1}
+        onClick={() => setPage(page - 1)}
+    >
+        Previous
+    </button>
+
+    {Array.from(
+        { length: totalPage },
+        (_, index) => index + 1
+    ).map((pageNumber) => (
+        <button
+            key={pageNumber}
+            onClick={() => setPage(pageNumber)}
+            className={
+                page === pageNumber
+                    ? "font-bold"
+                    : ""
+            }
+        >
+            {pageNumber}
+        </button>
+    ))}
+
+    <button
+        disabled={page === totalPage}
+        onClick={() => setPage(page + 1)}
+    >
+        Next
+    </button>
+</div>
         </div>
     )
 }

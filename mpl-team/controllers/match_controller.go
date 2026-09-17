@@ -3,7 +3,9 @@ package controllers
 import (
 	"mpl-team/config"
 	"mpl-team/models"
+	"mpl-team/scopes"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -11,14 +13,32 @@ import (
 
 func FindMatches(c *gin.Context) {
 	var matches []models.Match
-	if err := config.DB.Preload("HomeTeam").Preload("AwayTeam").Preload("Event").
-		Preload("Event.Phase").Preload("Event.Phase.Tournament").Find(&matches).Error; err != nil {
+
+	var totalCount int64
+	config.DB.Model(&models.Match{}).Count(&totalCount)
+	if err := config.DB.Preload("HomeTeam").
+		Preload("AwayTeam").
+		Preload("Event").
+		Preload("Event.Phase").
+		Preload("Event.Phase.Tournament").
+		Scopes(scopes.Paginate(c)).
+		Find(&matches).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to retrieve matches"})
 		return
 	}
+
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "7"))
+	totalPage := int(totalCount) / pageSize
+	if int(totalCount)%pageSize != 0 {
+		totalPage++
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"data": matches,
+		"data":       matches,
+		"page":       c.DefaultQuery("page", "1"),
+		"pageSize":   pageSize,
+		"totalPage":  totalPage,
+		"totalCount": totalCount,
 	})
 }
 
