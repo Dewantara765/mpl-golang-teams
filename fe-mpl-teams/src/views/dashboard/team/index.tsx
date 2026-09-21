@@ -35,7 +35,7 @@ export default function Team() {
             <Link to="/dashboard/team/create" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-4 rounded">
                 Create Team
             </Link>
-            <h1>Team</h1>
+            
             {teams && teams.length > 0 ? (
                 <table className="table-auto border-collapse border border-gray-300 mt-4">
                     <thead>

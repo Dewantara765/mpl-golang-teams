@@ -14,5 +14,6 @@ func main() {
 		&models.Phase{},
 		&models.Event{},
 		&models.Match{},
+		&models.Hero{},
 	)
 }

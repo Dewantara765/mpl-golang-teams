@@ -21,6 +21,10 @@ import EventEdit from '../views/dashboard/event/edit.tsx'
 import DashboardMatchIndex from '../views/dashboard/match/index.tsx'
 import CreateMatch from '../views/dashboard/match/create.tsx'
 import EditMatch from '../views/dashboard/match/edit.tsx'
+import HeroIndex from '../views/hero/index.tsx'
+import DashboardHeroIndex from '../views/dashboard/hero/index.tsx'
+import HeroCreate from '../views/dashboard/hero/create.tsx'
+import HeroEdit from '../views/dashboard/hero/edit.tsx'
 
     
 export default function AppRoutes() {
@@ -31,6 +35,7 @@ export default function AppRoutes() {
         <Route path="*" element={<NotFound />} />
         <Route path="/tournament" element={<TournamentIndex />} />
         <Route path="/tournament/:slug" element={<MatchIndex />} />
+        <Route path="/heroes" element={<HeroIndex/>}/>
         
       </Route>
       <Route element={<DashboardLayout />}>
@@ -49,6 +54,9 @@ export default function AppRoutes() {
         <Route path="/dashboard/match" element={<DashboardMatchIndex/>}/>
         <Route path="/dashboard/match/create" element={<CreateMatch/>}/>
         <Route path="/dashboard/match/edit/:id" element={<EditMatch/>}/>
+        <Route path="/dashboard/hero" element={<DashboardHeroIndex/>}/>
+        <Route path="/dashboard/hero/create" element={<HeroCreate/>}/>
+        <Route path="/dashboard/hero/edit/:id" element={<HeroEdit/>}/>
       </Route>
     </Routes>
   )

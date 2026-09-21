@@ -52,4 +52,13 @@ func SetupRoutes(router *gin.Engine) {
 		match.PUT("/:id", controllers.UpdateMatch)
 		match.DELETE("/:id", controllers.DeleteMatch)
 	}
+
+	hero := router.Group("/heroes")
+	{
+		hero.GET("", controllers.FindHeroes)
+		hero.GET("/:id", controllers.FindHeroByID)
+		hero.POST("", controllers.CreateHero)
+		hero.PUT("/:id", controllers.UpdateHero)
+		hero.DELETE("/:id", controllers.DeleteHero)
+	}
 }

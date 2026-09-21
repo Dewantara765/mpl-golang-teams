@@ -24,9 +24,9 @@ export default function Home() {
     }, [])
 
     return (
-    <div className="flex text-blue-500 py-2">
+    <div className="md:flex text-blue-500 py-2">
       {teams.map((team) => (
-        <div key={team.id} className="mx-4 my-4 flex flex-col items-center border border-gray-300 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-300">
+        <div key={team.id} className="w-full md:w-1/6 mx-4 my-4 flex flex-col items-center border border-gray-300 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-300">
           <img src={`http://localhost:8080/${team.logo}`} alt={team.name} />
           <h2 className="text-lg font-bold justify-center">{team.short_name}</h2>
         </div>

@@ -147,16 +147,16 @@ export default function MatchIndex() {
                                                     {event.matches.map((match) => (
                                                         <div
                                                             key={match.id}
-                                                            className="border w-full lg:w-1/4 p-3 font-normal m-2"
+                                                            className="border w-full md:w-1/3 p-3 font-normal m-2"
                                                         >
-                                                             <div className="flex items-center justify-between gap-3">
+                                                    <div className="flex items-center justify-between gap-3">
                                                     <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
                                                         <span className="truncate text-sm sm:text-base">
                                                             {match.home_team.short_name}
                                                         </span>
 
                                                         <img
-                                                            className="w-10 h-10 lg:h-14 lg:w-14 object-contain sm:h-16 sm:w-16"
+                                                            className="w-10 h-10 md:h-14 md:w-14 object-contain sm:h-16 sm:w-16"
                                                             src={`http://localhost:8080/${match.home_team.logo}`}
                                                             alt={match.home_team.short_name}
                                                         />

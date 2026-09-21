@@ -114,37 +114,37 @@ export default function DashboardMatchIndex(){
                     </tbody>
                 </table>
                 <div className="flex gap-2 mt-4">
-    <button
-        disabled={page === 1}
-        onClick={() => setPage(page - 1)}
-    >
-        Previous
-    </button>
+                <button
+                    disabled={page === 1}
+                    onClick={() => setPage(page - 1)}
+                >
+                    Previous
+                </button>
 
-    {Array.from(
-        { length: totalPage },
-        (_, index) => index + 1
-    ).map((pageNumber) => (
-        <button
-            key={pageNumber}
-            onClick={() => setPage(pageNumber)}
-            className={
-                page === pageNumber
-                    ? "font-bold"
-                    : ""
-            }
-        >
-            {pageNumber}
-        </button>
-    ))}
+                {Array.from(
+                    { length: totalPage },
+                    (_, index) => index + 1
+                ).map((pageNumber) => (
+                    <button
+                        key={pageNumber}
+                        onClick={() => setPage(pageNumber)}
+                        className={
+                            page === pageNumber
+                                ? "font-bold"
+                                : ""
+                        }
+                    >
+                        {pageNumber}
+                    </button>
+                ))}
 
-    <button
-        disabled={page === totalPage}
-        onClick={() => setPage(page + 1)}
-    >
-        Next
-    </button>
-</div>
-        </div>
-    )
+                <button
+                    disabled={page === totalPage}
+                    onClick={() => setPage(page + 1)}
+                >
+                    Next
+                </button>
+            </div>
+                    </div>
+                )
 }
