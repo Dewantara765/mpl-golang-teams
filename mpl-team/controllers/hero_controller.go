@@ -83,6 +83,7 @@ func FindHeroes(c *gin.Context) {
 
 	var total int64
 
+	search := strings.TrimSpace(c.DefaultQuery("search", ""))
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "7"))
 
@@ -96,11 +97,18 @@ func FindHeroes(c *gin.Context) {
 
 	offset := (page - 1) * limit
 
-	config.DB.Model(&models.Hero{}).Count(&total)
-	if err := config.DB.
+	query := config.DB.Model(&models.Hero{})
+
+	if search != "" {
+		query = query.Where("name LIKE ?", "%"+search+"%")
+	}
+
+	query = query.Scopes(scopes.Sort(c))
+
+	query.Count(&total)
+	if err := query.
 		Limit(limit).
 		Offset(offset).
-		Scopes(scopes.Sort(c)).
 		Find(&heroes).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to retrieve heroes"})
@@ -110,7 +118,7 @@ func FindHeroes(c *gin.Context) {
 	totalPages := int(math.Ceil(float64(total) / float64(limit)))
 
 	sort := c.DefaultQuery("sort", "id")
-	order := c.DefaultQuery("order", "desc")
+	order := c.DefaultQuery("order", "asc")
 	c.JSON(http.StatusOK, gin.H{
 		"data":        heroes,
 		"page":        page,

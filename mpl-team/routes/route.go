@@ -60,5 +60,6 @@ func SetupRoutes(router *gin.Engine) {
 		hero.POST("", controllers.CreateHero)
 		hero.PUT("/:id", controllers.UpdateHero)
 		hero.DELETE("/:id", controllers.DeleteHero)
+
 	}
 }

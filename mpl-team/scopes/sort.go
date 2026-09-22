@@ -3,8 +3,6 @@ package scopes
 import (
 	"strings"
 
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -12,14 +10,22 @@ import (
 func Sort(c *gin.Context) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		sort := c.DefaultQuery("sort", "id")
-		order := c.DefaultQuery("order", "asc")
+		order := strings.ToLower(c.DefaultQuery("order", "asc"))
 
-		if strings.ToLower(order) != "asc" && strings.ToLower(order) != "desc" {
+		allowedSort := map[string]string{
+			"id":   "id",
+			"name": "name",
+		}
+
+		column, exists := allowedSort[sort]
+		if !exists {
+			column = "id"
+		}
+
+		if order != "asc" && order != "desc" {
 			order = "asc"
 		}
 
-		OrderQuery := fmt.Sprintf("%s %s", sort, order)
-		db = db.Order(OrderQuery)
-		return db
+		return db.Order(column + " " + order)
 	}
 }
