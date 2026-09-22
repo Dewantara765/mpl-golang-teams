@@ -15,5 +15,6 @@ func main() {
 		&models.Event{},
 		&models.Match{},
 		&models.Hero{},
+		&models.Game{},
 	)
 }

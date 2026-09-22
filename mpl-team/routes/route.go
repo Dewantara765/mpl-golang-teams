@@ -62,4 +62,10 @@ func SetupRoutes(router *gin.Engine) {
 		hero.DELETE("/:id", controllers.DeleteHero)
 
 	}
+
+	game := router.Group("/games")
+	{
+		game.GET("", controllers.FindGames)
+		game.POST("", controllers.CreateGame)
+	}
 }

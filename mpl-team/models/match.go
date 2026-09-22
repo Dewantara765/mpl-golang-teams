@@ -13,4 +13,5 @@ type Match struct {
 	BestOf     *int   `json:"best_of" gorm:"default:1"`
 	EventID    uint   `json:"event_id" gorm:"not null" `
 	Event      Event  `json:"event" gorm:"foreignKey:EventID"`
+	Games      []Game `json:"games" gorm:"foreignKey:MatchID"`
 }
