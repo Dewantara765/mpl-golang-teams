@@ -19,3 +19,7 @@ a.active {
 .input-label {
   @apply block w-40 font-medium;
 }
+
+.button {
+  @apply bg-blue-500 hover:bg-blue-700 rounded-md px-4 py-2 text-white;
+}

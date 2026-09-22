@@ -5,6 +5,7 @@ export default function MatchIndex() {
     const [tournament, setTournament] = useState<Tournament | null>(null);
     const [selectedPhase, setSelectedPhase] = useState("all");
     const [selectedEvent, setSelectedEvent] = useState("all");
+    const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
     const { slug } = useParams<{ slug: string }>();
     interface Tournament {
         id: number;
@@ -33,8 +34,16 @@ export default function MatchIndex() {
         home_score : number,
         away_score : number,
         date: string,
-        time: string
+        time: string,
+        Games: Game[],
 
+    }
+    interface Game {
+        id: number,
+        game_number: number,
+        match: Match,
+        winner_team: Team,
+        duration: number,
     }
 
     interface Team {
@@ -53,11 +62,11 @@ export default function MatchIndex() {
             } catch (error) {
                 console.error('Error fetching tournament:', error);
             }
-        };
-       
+        };   
         
         fetchTournaments();
-    }, []);
+        console.log(selectedMatch)
+    }, [selectedMatch]);
 
     const formatDate = (date: string) => {
         const formattedDate = date.slice(0,10)
@@ -69,6 +78,12 @@ export default function MatchIndex() {
     const formatTime = (time: string) => {
         const formattedTime = time.slice(0,5)
         return formattedTime
+    }
+
+    const convertDuration = (duration: number) => {
+        const seconds = duration % 60;
+        const minutes = Math.floor(duration / 60)
+        return `${minutes}:${seconds}`
     }
     return (
         <div className="p-4">
@@ -186,9 +201,81 @@ export default function MatchIndex() {
                                                         Jadwal belum tersedia
                                                     </div>
                                                     )}
+                                                    <button onClick={() => setSelectedMatch(match)} className='button'>Detail</button>
                                                 </div>
+                                                {selectedMatch && (
+                                                    <div
+                                                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                                                        onClick={() => setSelectedMatch(null)}
+                                                    >
+                                                        <div
+                                                            className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            {/* Header */}
+                                                            <div className="flex items-center justify-between border-b pb-4">
+                                                                <div>
+                                                                    <h2 className="text-xl font-bold">
+                                                                        {selectedMatch.home_team.short_name}
+                                                                        {" vs "}
+                                                                        {selectedMatch.away_team.short_name}
+                                                                    </h2>
+
+                                                                    <p className="text-sm text-gray-500">
+                                                                        Game Details
+                                                                    </p>
+                                                                </div>
+
+                                                                <button
+                                                                    onClick={() => setSelectedMatch(null)}
+                                                                    className="text-2xl text-gray-500 hover:text-gray-800"
+                                                                >
+                                                                    &times;
+                                                                </button>
+                                                            </div>
+
+                                                            {/* Games */}
+                                                            <div className="mt-4 space-y-3">
+                                                                {selectedMatch.games.map((game) => (
+                                                                    <div
+                                                                        key={game.id}
+                                                                        className="rounded-lg border p-4"
+                                                                    >
+                                                                        <div className="flex items-center justify-between">
+                                                                            <span className="font-semibold">
+                                                                                Game {game.game_number} 
+                                                                            </span>
+                                                                            {game.winner_team_id === selectedMatch.home_team.id ?
+                                                                            <span>
+                                                                                {selectedMatch.home_team.short_name} Win
+                                                                            </span> :
+                                                                            <span>
+                                                                                {selectedMatch.away_team.short_name} Win
+                                                                            </span>
+                                                                            
+                                                                            }
+
+                                                                        
+
+                                                                            <span className="text-sm text-gray-500">
+                                                                                {convertDuration(game.duration)}
+                                                                            </span>
+                                                                        </div>
+
+                                                                        
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+
+                                                
+                                                
 
                                                         </div>
+                                                        
                                                     ))}
 
                                                 </div>

@@ -21,6 +21,7 @@ func FindMatches(c *gin.Context) {
 		Preload("Event").
 		Preload("Event.Phase").
 		Preload("Event.Phase.Tournament").
+		Preload("Games").
 		Scopes(scopes.Paginate(c)).
 		Find(&matches).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

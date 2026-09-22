@@ -30,7 +30,8 @@ func FindTournamentBySlug(c *gin.Context) {
 		Preload("Phases.Events").
 		Preload("Phases.Events.Matches").
 		Preload("Phases.Events.Matches.HomeTeam").
-		Preload("Phases.Events.Matches.AwayTeam").First(&tournament, "slug = ?", slug).Error; err != nil {
+		Preload("Phases.Events.Matches.AwayTeam").
+		Preload("Phases.Events.Matches.Games").First(&tournament, "slug = ?", slug).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Tournament not found"})
 		return
 	}
@@ -46,7 +47,8 @@ func FindTournamentByID(c *gin.Context) {
 		Preload("Phases.Events").
 		Preload("Phases.Events.Matches").
 		Preload("Phases.Events.Matches.HomeTeam").
-		Preload("Phases.Events.Matches.AwayTeam").First(&tournament, "id = ?", id).Error; err != nil {
+		Preload("Phases.Events.Matches.AwayTeam").
+		First(&tournament, "id = ?", id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Tournament not found"})
 		return
 	}
