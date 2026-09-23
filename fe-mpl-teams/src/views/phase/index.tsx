@@ -1,6 +1,9 @@
 import {useState, useEffect} from 'react'
 import {api} from '../../services/api.ts'
 import {useParams} from 'react-router-dom'
+import { formatDate } from '../../../utils/formatDate.ts';
+import { formatTime } from '../../../utils/formatTime.ts';
+import { convertDuration } from '../../../utils/duration.ts';
 export default function MatchIndex() {
     const [tournament, setTournament] = useState<Tournament | null>(null);
     const [selectedPhase, setSelectedPhase] = useState("all");
@@ -54,7 +57,6 @@ export default function MatchIndex() {
     
 
     useEffect(() => {
-        document.title = 'Match Index';
         const fetchTournaments = async () => {
             try {
                 const response = await api.get(`/tournaments/${slug}`);
@@ -65,28 +67,16 @@ export default function MatchIndex() {
         };   
         
         fetchTournaments();
-        console.log(selectedMatch)
-    }, [selectedMatch]);
+        
+    }, []);
 
-    const formatDate = (date: string) => {
-        const formattedDate = date.slice(0,10)
-        const month = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
-        const [year, monthIndex, day] = formattedDate.split('-');
-        return `${day} ${month[parseInt(monthIndex) - 1]} ${year}`;
-    }
 
-    const formatTime = (time: string) => {
-        const formattedTime = time.slice(0,5)
-        return formattedTime
-    }
+    
 
-    const convertDuration = (duration: number) => {
-        const seconds = duration % 60;
-        const minutes = Math.floor(duration / 60)
-        return `${minutes}:${seconds}`
-    }
+  
     return (
         <div className="p-4">
+            <title>Tournament Details</title>
             {tournament && (
                 <div>
                     <h2>{tournament.name}</h2>

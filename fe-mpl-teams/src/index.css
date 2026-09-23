@@ -23,3 +23,19 @@ a.active {
 .button {
   @apply bg-blue-500 hover:bg-blue-700 rounded-md px-4 py-2 text-white;
 }
+
+.header-title {
+  @apply font-bold text-xl;
+}
+
+.sub-header-title {
+  @apply font-semibold text-xl mt-3;
+}
+
+.table-cell {
+  @apply border border-gray-300 px-4 py-2;
+}
+
+.table-container {
+  @apply table-auto border-collapse border border-gray-300 m-4 p-2;
+}

@@ -47,7 +47,13 @@ func FindMatchByID(c *gin.Context) {
 	id := c.Param("id")
 	var match models.Match
 
-	if err := config.DB.Preload("HomeTeam").Preload("AwayTeam").Preload("Games").First(&match, id).Error; err != nil {
+	if err := config.DB.Preload("HomeTeam").
+		Preload("AwayTeam").
+		Preload("Event").
+		Preload("Event.Phase").
+		Preload("Event.Phase.Tournament").
+		Preload("Games").
+		Preload("Games.WinnerTeam").First(&match, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Match not found"})
 		return
 	}

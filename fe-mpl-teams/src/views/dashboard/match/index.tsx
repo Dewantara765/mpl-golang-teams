@@ -73,33 +73,36 @@ export default function DashboardMatchIndex(){
             <Link to="/dashboard/match/create" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                 Create Match
             </Link>
-            <table className="table-auto border-collapse border border-gray-300 mt-4 p-2">
+            <table className="table-container">
                     <thead>
                         <tr>
-                            <th className="border border-gray-300 px-4 py-2">No</th>
-                            <th className="border border-gray-300 px-4 py-2">Match</th>
-                            <th className="border border-gray-300 px-4 py-2">Best Of</th>
-                            <th className="border border-gray-300 px-4 py-2">Date</th>
-                            <th className="border border-gray-300 px-4 py-2">Time</th>
-                            <th className="border border-gray-300 px-4 py-2">Event</th>
-                            <th className="border border-gray-300 px-4 py-2">Phase</th>
-                            <th className="border border-gray-300 px-4 py-2">Tournament</th>
-                            <th className="border border-gray-300 px-4 py-2">Action</th>
+                            <th className="table-cell">No</th>
+                            <th className="table-cell">Match</th>
+                            <th className="table-cell">Best Of</th>
+                            <th className="table-cell">Date</th>
+                            <th className="table-cell">Time</th>
+                            <th className="table-cell">Event</th>
+                            <th className="table-cell">Phase</th>
+                            <th className="table-cell">Tournament</th>
+                            <th className="table-cell">Action</th>
                         </tr>
 
                     </thead>
                     <tbody>
                         {matches.map((match, index) => (
                             <tr key={match.id}>
-                                <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-                                <td className="border border-gray-300 px-4 py-2">{match.home_team.short_name} {match.home_score}-{match.away_score} {match.away_team.short_name}</td>
-                                <td className="border border-gray-300 px-4 py-2">{match.best_of}</td>
-                                <td className="border border-gray-300 px-4 py-2">{formatDate(match.date)}</td>
-                                <td className="border border-gray-300 px-4 py-2">{formatTime(match.time)}</td>
-                                <td className="border border-gray-300 px-4 py-2">{match.event.name}</td>
-                                <td className="border border-gray-300 px-4 py-2">{match.event.phase.name}</td>
-                                <td className="border border-gray-300 px-4 py-2">{match.event.phase.tournament.name}</td>
-                                <td className="border border-gray-300 px-4 py-2">
+                                <td className="table-cell">{index + 1}</td>
+                                <td className="table-cell">{match.home_team.short_name} {match.home_score}-{match.away_score} {match.away_team.short_name}</td>
+                                <td className="table-cell">{match.best_of}</td>
+                                <td className="table-cell">{formatDate(match.date)}</td>
+                                <td className="table-cell">{formatTime(match.time)}</td>
+                                <td className="table-cell">{match.event.name}</td>
+                                <td className="table-cell">{match.event.phase.name}</td>
+                                <td className="table-cell">{match.event.phase.tournament.name}</td>
+                                <td className="table-cell">
+                                    <Link to={`/dashboard/match/${match.id}`} className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded mr-2">
+                                        Details
+                                    </Link>
                                     <Link to={`/dashboard/match/edit/${match.id}`} className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mr-2">
                                         Edit
                                     </Link>
