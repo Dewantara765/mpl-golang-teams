@@ -8,8 +8,8 @@ export default function CreateMatch() {
     const [home_team_id, setHomeTeamId] = useState<number>(0);
     const [away_team_id, setAwayTeamId] = useState<number>(0);
     const [event_id, setEventId] = useState<number>(0);
-    const [home_score, setHomeScore] = useState<number>(0);
-    const [away_score, setAwayScore] = useState<number>(0);
+    // const [home_score, setHomeScore] = useState<number >(0);
+    // const [away_score, setAwayScore] = useState<number>(0);
     const [date, setDate] = useState<string>("");
     const [time, setTime] = useState<string>("");
     const [best_of, setBestOf] = useState<number>(1);
@@ -61,8 +61,6 @@ export default function CreateMatch() {
             home_team_id,
             away_team_id,
             event_id,
-            home_score,
-            away_score,
             date,
             time: formattedTime,
             best_of,
@@ -118,7 +116,7 @@ export default function CreateMatch() {
                     onChange={(e) => setBestOf(Number(e.target.value))} />
                 </div>
 
-                <div className="flex gap-2 items-center">
+                {/* <div className="flex gap-2 items-center">
                     <label htmlFor="home_score" className="input-label">Home Score</label>
                     <input value={home_score} type="number" id="home_score" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setHomeScore(Number(e.target.value))} />
@@ -127,7 +125,7 @@ export default function CreateMatch() {
                     <label htmlFor="away_score" className="input-label">Away Score</label>
                     <input value={away_score} type="number" id="away_score" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setAwayScore(Number(e.target.value))} />
-                </div>
+                </div> */}
                 <div className="flex gap-2 items-center">
                     <label htmlFor="date" className="input-label">Date</label>
                     <input value={date} type="date" id="date" className="mt-1 block w-50 input-field" 

@@ -65,13 +65,12 @@ func CreateMatch(c *gin.Context) {
 		HomeTeamID uint   `json:"home_team_id" binding:"required"`
 		AwayTeamID uint   `json:"away_team_id" binding:"required"`
 		EventID    uint   `json:"event_id" binding:"required"`
-		HomeScore  *int   `json:"home_score"`
-		AwayScore  *int   `json:"away_score"`
 		BestOf     *int   `json:"best_of"`
 		Date       string `json:"date" binding:"required"`
 		Time       string `json:"time" binding:"required"`
 	}
 
+	// 1. Bind JSON
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -79,7 +78,7 @@ func CreateMatch(c *gin.Context) {
 		return
 	}
 
-	// Home and away team cannot be the same
+	// 2. Validate teams
 	if input.HomeTeamID == input.AwayTeamID {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Home team and away team cannot be the same",
@@ -87,22 +86,7 @@ func CreateMatch(c *gin.Context) {
 		return
 	}
 
-	// Validate scores
-	if input.HomeScore != nil && *input.HomeScore < 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Home score cannot be negative",
-		})
-		return
-	}
-
-	if input.AwayScore != nil && *input.AwayScore < 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Away score cannot be negative",
-		})
-		return
-	}
-
-	// Validate date
+	// 3. Validate date
 	if _, err := time.Parse("2006-01-02", input.Date); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid date format, use YYYY-MM-DD",
@@ -110,7 +94,7 @@ func CreateMatch(c *gin.Context) {
 		return
 	}
 
-	// Validate time
+	// 4. Validate time
 	if _, err := time.Parse("15:04:05", input.Time); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid time format, use HH:MM:SS",
@@ -118,7 +102,19 @@ func CreateMatch(c *gin.Context) {
 		return
 	}
 
-	// Check home team
+	// 5. Validate BestOf
+	if input.BestOf != nil &&
+		*input.BestOf != 3 &&
+		*input.BestOf != 5 &&
+		*input.BestOf != 7 {
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Best of must be 3, 5 or 7",
+		})
+		return
+	}
+
+	// 6. Check teams & event
 	var homeTeam models.Team
 	if err := config.DB.First(&homeTeam, input.HomeTeamID).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -127,7 +123,6 @@ func CreateMatch(c *gin.Context) {
 		return
 	}
 
-	// Check away team
 	var awayTeam models.Team
 	if err := config.DB.First(&awayTeam, input.AwayTeamID).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -136,7 +131,6 @@ func CreateMatch(c *gin.Context) {
 		return
 	}
 
-	// Check event
 	var event models.Event
 	if err := config.DB.First(&event, input.EventID).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -145,16 +139,15 @@ func CreateMatch(c *gin.Context) {
 		return
 	}
 
-	// Create match
+	// 7. Create match
 	match := models.Match{
 		HomeTeamID: input.HomeTeamID,
 		AwayTeamID: input.AwayTeamID,
 		EventID:    input.EventID,
-		HomeScore:  input.HomeScore,
-		AwayScore:  input.AwayScore,
 		Date:       input.Date,
 		Time:       input.Time,
 		BestOf:     input.BestOf,
+		Status:     models.MatchScheduled,
 	}
 
 	if err := config.DB.Create(&match).Error; err != nil {
@@ -164,7 +157,7 @@ func CreateMatch(c *gin.Context) {
 		return
 	}
 
-	// Load relationships
+	// 8. Load relationships
 	if err := config.DB.
 		Preload("HomeTeam").
 		Preload("AwayTeam").
@@ -177,6 +170,7 @@ func CreateMatch(c *gin.Context) {
 		return
 	}
 
+	// 9. Response
 	c.JSON(http.StatusCreated, gin.H{
 		"data": match,
 	})

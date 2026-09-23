@@ -85,9 +85,9 @@ export default function DashboardMatchShow(){
                         <th className="table-cell">Hasil pertandingan</th>
                         <td className="table-cell">
                             <div className="flex gap-2">
-                                <img src={home_team_logo} alt={home_team_name} className="w-10 object-cover"/>
+                                <img src={home_team_logo} alt={home_team_name} className="w-10 object-contain"/>
                                 <div>{home_team_name} <b>{home_score}</b>-<b>{away_score}</b> {away_team_name} </div>
-                                <img src={away_team_logo} alt={away_team_name} className="w-10 object-cover"/>
+                                <img src={away_team_logo} alt={away_team_name} className="w-10 object-contain"/>
                             </div>
                             <div className="text-center">
                                 (BO{best_of})
@@ -148,7 +148,8 @@ export default function DashboardMatchShow(){
                     )}
 
                 </tbody>
-            </table>
+            </table> 
+            
             <Link to={`/dashboard/match/${id}/create`} className="button">Buat game</Link>
             
         </div>

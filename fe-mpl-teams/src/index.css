@@ -39,3 +39,7 @@ a.active {
 .table-container {
   @apply table-auto border-collapse border border-gray-300 m-4 p-2;
 }
+
+.input-container {
+  @apply flex gap-2 items-center;
+}

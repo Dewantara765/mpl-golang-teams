@@ -134,18 +134,18 @@ export default function EditMatch() {
                 <div className="flex gap-2 items-center">
                     <label htmlFor="best_of" className="block w-40 text-md font-medium text-gray-700">Best Of</label>
                     <input value={best_of} type="number" id="best_of" className="mt-1 block w-50 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
-                    onChange={(e) => setBestOf(Number(e.target.value))} />
+                    readOnly />
                 </div>
 
                 <div className="flex gap-2 items-center">
                     <label htmlFor="home_score" className="input-label">Home Score</label>
                     <input value={home_score} type="number" id="home_score" className="mt-1 block w-50 input-field" 
-                    onChange={(e) => setHomeScore(Number(e.target.value))} />
+                    readOnly />
                 </div>
                 <div className="flex gap-2 items-center">
                     <label htmlFor="away_score" className="input-label">Away Score</label>
                     <input value={away_score} type="number" id="away_score" className="mt-1 block w-50 input-field" 
-                    onChange={(e) => setAwayScore(Number(e.target.value))} />
+                    readOnly />
                 </div>
                 <div className="flex gap-2 items-center">
                     <label htmlFor="date" className="input-label">Date</label>

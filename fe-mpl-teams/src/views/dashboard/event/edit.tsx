@@ -74,11 +74,11 @@ export default function EventEdit() {
                 </div>
                 <div className="flex gap-2 items-center">
                     <label htmlFor="phase_id" className="block input-label">Phase</label>
-                    <select value={phase_id} id="phase_id" className="mt-1 block w-50 select-field" 
+                    <select value={phase_id} id="phase_id" className="mt-1 block w-80 select-field" 
                     onChange={(e) => setPhaseId(Number(e.target.value))}>
                         <option value="">Select a phase</option>
                         {phases.map((phase) => (
-                            <option key={phase.id} value={phase.id}>{phase.name}</option>
+                            <option key={phase.id} value={phase.id}>{phase.name} -{phase.tournament.name}</option>
                         ))}
                     </select>
                     {errors.phase_id && <p className="text-red-500 text-sm">{errors.phase_id}</p>}

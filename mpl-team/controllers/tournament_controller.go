@@ -4,6 +4,7 @@ import (
 	"mpl-team/config"
 	"mpl-team/models"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -65,22 +66,31 @@ func CreateTournament(c *gin.Context) {
 		Slug      string `json:"slug" binding:"required"`
 	}
 
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"errors": map[string]string{
+				"input": err.Error(),
+			},
+		})
+		return
+	}
+
 	errors := make(map[string]string)
 
-	if input.Name == "" {
-		errors["name"] = "Name is required"
+	// Validasi tanggal
+	startDate, err := time.Parse("2006-01-02", input.StartDate)
+	if err != nil {
+		errors["start_date"] = "Start date must be in YYYY-MM-DD format"
 	}
 
-	if input.StartDate == "" {
-		errors["start_date"] = "Start date is required"
+	endDate, err := time.Parse("2006-01-02", input.EndDate)
+	if err != nil {
+		errors["end_date"] = "End date must be in YYYY-MM-DD format"
 	}
 
-	if input.EndDate == "" {
-		errors["end_date"] = "End date is required"
-	}
-
-	if input.Slug == "" {
-		errors["slug"] = "Slug is required"
+	// Pastikan start date <= end date
+	if len(errors) == 0 && endDate.Before(startDate) {
+		errors["end_date"] = "End date must be after or equal to start date"
 	}
 
 	if len(errors) > 0 {
@@ -105,6 +115,7 @@ func CreateTournament(c *gin.Context) {
 		})
 		return
 	}
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Tournament created successfully",
 		"data":    tournament,

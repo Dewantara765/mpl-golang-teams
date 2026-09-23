@@ -237,10 +237,10 @@ export default function MatchIndex() {
                                                                             </span>
                                                                             {game.winner_team_id === selectedMatch.home_team.id ?
                                                                             <span>
-                                                                                {selectedMatch.home_team.short_name} Win
+                                                                                {selectedMatch.home_team.short_name} Menang
                                                                             </span> :
                                                                             <span>
-                                                                                {selectedMatch.away_team.short_name} Win
+                                                                                {selectedMatch.away_team.short_name} Menang
                                                                             </span>
                                                                             
                                                                             }

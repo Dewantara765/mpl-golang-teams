@@ -65,7 +65,7 @@ export default function EventCreate() {
                         <option value={0}>Select a phase</option>
                         {phases.map((phase) => (
                             <option key={phase.id} value={phase.id}>
-                                {phase.name}
+                                {phase.name} - {phase.tournament.name}
                             </option>
                         ))}
                     </select>

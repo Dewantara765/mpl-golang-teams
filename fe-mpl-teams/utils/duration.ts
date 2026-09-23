@@ -1,5 +1,18 @@
 export const convertDuration = (duration: number) => {
-        const seconds = duration % 60;
+        let seconds = duration % 60;
+        let formattedSeconds 
+        let formattedMinutes
         const minutes = Math.floor(duration / 60)
-        return `${minutes}:${seconds}`
+        if (seconds < 10) {
+            formattedSeconds =  `0${seconds}`
+        }else {
+            formattedSeconds = seconds;
+        }
+
+        if (minutes < 10) {
+            formattedMinutes = `0${minutes}`
+        }else {
+            formattedMinutes = minutes;
+        }
+        return `${formattedMinutes}:${formattedSeconds}`
     }

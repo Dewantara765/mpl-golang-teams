@@ -40,20 +40,21 @@ func CreatePhase(c *gin.Context) {
 
 	errors := make(map[string]string)
 
-	if input.Name == "" {
-		errors["name"] = "Name is required"
-	}
+	// Bind request JSON
+	if err := c.ShouldBindJSON(&input); err != nil {
+		errors["input"] = err.Error()
 
-	if input.Slug == "" {
-		errors["slug"] = "Slug is required"
+		c.JSON(http.StatusBadRequest, gin.H{
+			"errors": errors,
+		})
+		return
 	}
 
 	var tournament models.Tournament
+
 	if err := config.DB.First(&tournament, input.TournamentID).Error; err != nil {
 		errors["tournament_id"] = "Tournament not found"
-	}
 
-	if len(errors) > 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"errors": errors,
 		})
