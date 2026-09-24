@@ -2,7 +2,10 @@ package main
 
 import (
 	"mpl-team/config"
+	"mpl-team/controllers"
+	"mpl-team/repositories"
 	"mpl-team/routes"
+	"mpl-team/services"
 
 	"time"
 
@@ -26,7 +29,22 @@ func main() {
 	// Connect database and run migration
 	config.ConnectDatabase()
 
-	routes.SetupRoutes(r)
+	// Repository
+	matchRepository := repositories.NewMatchRepository()
+	standingRepository := repositories.NewStandingRepository()
+
+	// Service
+	matchService := services.NewMatchService(
+		matchRepository,
+		standingRepository,
+	)
+
+	// Controller
+	matchController := controllers.NewMatchController(
+		matchService,
+	)
+
+	routes.SetupRoutes(r, matchController)
 	r.Static("/uploads", "./uploads")
 
 	// Start application server on port 8080

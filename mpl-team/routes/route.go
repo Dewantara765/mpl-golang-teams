@@ -6,7 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(router *gin.Engine) {
+func SetupRoutes(
+	router *gin.Engine,
+	matchController *controllers.MatchController,
+) {
+
 	team := router.Group("/teams")
 	{
 		team.GET("", controllers.FindTeams)
@@ -46,10 +50,15 @@ func SetupRoutes(router *gin.Engine) {
 
 	match := router.Group("/matches")
 	{
-		match.GET("", controllers.FindMatches)
-		match.GET("/:id", controllers.FindMatchByID)
-		match.POST("", controllers.CreateMatch)
-		match.PUT("/:id", controllers.UpdateMatch)
+		match.GET("", matchController.FindMatches)
+		match.GET("/:id", matchController.FindMatchByID)
+		match.POST("", matchController.CreateMatch)
+		match.PUT("/:id", matchController.UpdateMatch)
+		match.POST("/:id/complete", matchController.CompleteMatch)
+		match.POST(
+			"/:id/update-standing",
+			matchController.UpdateStandingFromCompletedMatch,
+		)
 		match.DELETE("/:id", controllers.DeleteMatch)
 	}
 
@@ -60,12 +69,17 @@ func SetupRoutes(router *gin.Engine) {
 		hero.POST("", controllers.CreateHero)
 		hero.PUT("/:id", controllers.UpdateHero)
 		hero.DELETE("/:id", controllers.DeleteHero)
-
 	}
 
 	game := router.Group("/games")
 	{
 		game.GET("", controllers.FindGames)
 		game.POST("", controllers.CreateGame)
+	}
+
+	standing := router.Group("/standings")
+	{
+		standing.GET("", controllers.FindStandings)
+		standing.POST("", controllers.CreateStanding)
 	}
 }

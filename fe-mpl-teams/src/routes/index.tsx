@@ -27,7 +27,7 @@ import HeroCreate from '../views/dashboard/hero/create.tsx'
 import HeroEdit from '../views/dashboard/hero/edit.tsx'
 import DashboardMatchShow from '../views/dashboard/match/show.tsx'
 import GameCreate from '../views/dashboard/game/create.tsx'
-
+import DashboardStandingIndex from '../views/dashboard/standing/index.tsx'
     
 export default function AppRoutes() {
   return (
@@ -61,6 +61,7 @@ export default function AppRoutes() {
         <Route path="/dashboard/hero" element={<DashboardHeroIndex/>}/>
         <Route path="/dashboard/hero/create" element={<HeroCreate/>}/>
         <Route path="/dashboard/hero/edit/:id" element={<HeroEdit/>}/>
+        <Route path="/dashboard/standing" element={<DashboardStandingIndex/>}/>
       </Route>
     </Routes>
   )

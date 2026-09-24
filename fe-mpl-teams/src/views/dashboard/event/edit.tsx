@@ -12,7 +12,10 @@ export default function EventEdit() {
 
     interface Phase {
         id: number,
-        name: string
+        name: string,
+        tournament: {
+            name: string,
+        }
     }
 
     useEffect(() => {

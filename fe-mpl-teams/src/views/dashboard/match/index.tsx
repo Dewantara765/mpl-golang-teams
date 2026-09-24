@@ -1,12 +1,16 @@
 import {useEffect, useState} from "react";
 import { api } from "../../../services/api";
-import { data, Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { getPaginationPages } from "../../../../utils/pagination";
 export default function DashboardMatchIndex(){
     const [matches, setMatches] = useState<Match[]>([]);
-    
     const [page, setPage] = useState(1);
-    const [pageSize] = useState(7);
-    const [totalPage, setTotalPage] = useState(0);
+    const [total_pages, setTotalPages] = useState(0);
+    const pages = getPaginationPages(page, total_pages);
+    const [sort, setSort] = useState<string>("id");
+    const [order, setOrder] = useState<string>("asc");
+    const [searchParams] = useSearchParams()
+    
 
     const formatDate = (date: string) => {
         const formattedDate = date.slice(0,10)
@@ -45,16 +49,28 @@ export default function DashboardMatchIndex(){
     useEffect(() => {
         document.title = "Dashboard - Match Index"
         const fetchMatches = async () => {
+            const page = searchParams.get("page") || "1";
+            const sort = searchParams.get("sort") || "id";
+            const order = searchParams.get("order") || "desc"; 
             try {
-                const response = await api.get(`/matches?page=${page}&pageSize=${pageSize}`);
-                setMatches(response.data.data);
-                setTotalPage(response.data.totalPage);
+                const response = await api.get("/matches", {
+                    params: {
+                        page,
+                        sort,
+                        order,
+                    }
+                });
+                setPage(Number(page))
+                setSort(sort)
+                setOrder(order)
+                setMatches(response.data.data)
+                setTotalPages(response.data.totalPage)
             } catch (error) {
                 console.error("Error fetching matches:", error);
             }
         };
         fetchMatches();
-    },[page])
+    },[searchParams, page, sort, order])
 
     const handleDelete = async (id: number) => {
         try {
@@ -68,7 +84,7 @@ export default function DashboardMatchIndex(){
 
 
     return (
-        <div className='p-4'>
+        <div className='p-4'>       
             <p className="font-semibold text-xl mb-3">Match Index Page</p>
             <Link to="/dashboard/match/create" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                 Create Match
@@ -116,38 +132,67 @@ export default function DashboardMatchIndex(){
                         )}
                     </tbody>
                 </table>
-                <div className="flex gap-2 mt-4">
-                <button
-                    disabled={page === 1}
-                    onClick={() => setPage(page - 1)}
-                >
-                    Previous
-                </button>
+                <div className="flex items-center gap-2 mt-6">
 
-                {Array.from(
-                    { length: totalPage },
-                    (_, index) => index + 1
-                ).map((pageNumber) => (
+                    {/* Previous */}
+                    {page !== 1 ?
+                    <Link to={`/dashboard/match?page=${page - 1}&order=desc`}>
+                        <button
+                            className="px-3 py-2 border rounded"
+                        >
+                            Previous
+                        </button>
+                    </Link>
+                    : 
                     <button
-                        key={pageNumber}
-                        onClick={() => setPage(pageNumber)}
-                        className={
-                            page === pageNumber
-                                ? "font-bold"
-                                : ""
-                        }
-                    >
-                        {pageNumber}
-                    </button>
-                ))}
+                            className="px-3 py-2 border rounded opacity-50"
+                        >
+                            Previous
+                        </button>}
 
-                <button
-                    disabled={page === totalPage}
-                    onClick={() => setPage(page + 1)}
-                >
-                    Next
-                </button>
-            </div>
+                    {/* Page Numbers */}
+                    {pages.map((item, index) => {
+
+                        if (item === "...") {
+                            return (
+                                <span key={`dots-${index}`} className="px-2">
+                                    ...
+                                </span>
+                            );
+                        }
+
+                        return (
+                        <Link key={item} to={`/dashboard/match?page=${item}&order=${order}`}>
+                            <button
+                                className={`px-3 py-2 border rounded ${
+                                    page === item
+                                        ? "bg-blue-600 text-white"
+                                        : "bg-white text-black"
+                                }`}
+                            >
+                                {item}
+                            </button>
+                        </Link>
+                        );
+                    })}
+
+                    {/* Next */}
+                    {page !== total_pages ?
+                    <Link to={`/dashboard/match?page=${page + 1}&order=desc`}>
+                        <button
+                            className="px-3 py-2 border rounded"
+                        >
+                            Next
+                        </button>
+                    </Link>
+                    : 
+                    <button
+                            className="px-3 py-2 border rounded opacity-50"
+                        >
+                            Next
+                        </button>}
+
+                </div>
                     </div>
                 )
 }

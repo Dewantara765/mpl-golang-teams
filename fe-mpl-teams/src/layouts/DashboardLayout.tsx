@@ -12,6 +12,7 @@ export default function DashboardLayout(){
                     <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/event">Event</NavLink>
                     <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/match">Match</NavLink>
                     <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/hero">Hero</NavLink>
+                    <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/standing">Standing</NavLink>
                 </div>
             </div>
             <div className="w-7/8 h-screen">
