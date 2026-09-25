@@ -18,6 +18,7 @@ export default function DashboardStandingIndex(){
         team : {
             id: number,
             name: string,
+            logo: string,
         }
         match_played: number,
         match_win: number,
@@ -47,30 +48,47 @@ export default function DashboardStandingIndex(){
                             <th className="border border-gray-300 px-4 py-2">No</th>
                             <th className="border border-gray-300 px-4 py-2">Team </th>
                             <th className="border border-gray-300 px-4 py-2">MP</th>
-                            <th className="border border-gray-300 px-4 py-2">MW</th>
-                            <th className="border border-gray-300 px-4 py-2">ML</th>
-                            <th className="border border-gray-300 px-4 py-2">GW</th>
-                            <th className="border border-gray-300 px-4 py-2">GL</th>
+                            <th className="border border-gray-300 px-4 py-2">MW-ML</th>
+                            <th className="border border-gray-300 px-4 py-2">GW-GL</th>
                             <th className="border border-gray-300 px-4 py-2">GD</th>
                         </tr>
 
                     </thead>
                     <tbody>
-                        {standings.map((standing) => (
-                            <tr key={standing.id}>
-                                <td className="border border-gray-300 px-4 py-2">{standing.id}</td>
-                                <td className="border border-gray-300 px-4 py-2">{standing.team.name}</td>
+                        {standings.map((standing, index: number) => {
+                            const position = index + 1;
+
+                            let rowClass = "";
+
+                            if (position <= 2) {
+                            rowClass = "bg-green-100 hover:bg-green-200";
+                            } else if (position > standings.length - 3) {
+                            rowClass = "bg-red-100 hover:bg-red-200";
+                            } else {
+                            rowClass = "bg-white hover:bg-gray-50";
+                            }
+
+                        
+                        return (
+                            <tr key={standing.id} className={rowClass}>
+                                <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+                                <td className="border border-gray-300 px-4 py-2">
+                                    <div className="flex gap-2">
+                                        <img src={`http://localhost:8080/${standing.team.logo}`} alt={standing.team.name} 
+                                            className="w-10 object-cover"/>
+                                        <div>{standing.team.name}</div>
+                                    </div>
+                                    
+                                    </td>
                                 <td className="border border-gray-300 px-4 py-2">{standing.match_played}</td>
-                                <td className="border border-gray-300 px-4 py-2">{standing.match_win}</td>
-                                <td className="border border-gray-300 px-4 py-2">{standing.match_lose}</td>
-                                <td className="border border-gray-300 px-4 py-2">{standing.game_win}</td>
-                                <td className="border border-gray-300 px-4 py-2">{standing.game_lose}</td>
+                                <td className="border border-gray-300 px-4 py-2">{standing.match_win}-{standing.match_lose}</td>
+                                <td className="border border-gray-300 px-4 py-2">{standing.game_win}-{standing.game_lose}</td>
                                 <td className="border border-gray-300 px-4 py-2">{formatGameDiff(standing.game_diff)}</td>
 
                             </tr>
                         )
                     
-                    )}
+                    } )}
 
                     </tbody>
             </table>

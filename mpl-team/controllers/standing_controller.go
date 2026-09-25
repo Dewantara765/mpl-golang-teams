@@ -13,6 +13,10 @@ func FindStandings(c *gin.Context) {
 
 	if err := config.DB.Preload("Team").
 		Preload("Phase").
+		Order("match_win DESC").
+		Order("game_diff DESC").
+		Order("game_win DESC").
+		Order("id ASC").
 		Find(&standings).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to retrieve matches"})
