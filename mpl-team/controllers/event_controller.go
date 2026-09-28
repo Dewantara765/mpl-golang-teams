@@ -1,24 +1,59 @@
 package controllers
 
 import (
+	"math"
 	"mpl-team/config"
 	"mpl-team/models"
+	"mpl-team/scopes"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 func FindEvents(c *gin.Context) {
 	var events []models.Event
-	if err := config.DB.Preload("Phase").
-		Preload("Phase.Tournament").
-		Preload("Matches").Find(&events).Error; err != nil {
+
+	var total int64
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "7"))
+
+	if page < 1 {
+		page = 1
+	}
+
+	if limit < 1 || limit > 100 {
+		limit = 7
+	}
+
+	offset := (page - 1) * limit
+
+	query := config.DB.Model(&models.Event{})
+	query = query.Scopes(scopes.Sort(c))
+
+	query.Count(&total)
+	if err := query.
+		Limit(limit).
+		Offset(offset).
+		Preload("Phase").
+		Find(&events).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to retrieve events"})
 		return
 	}
+	totalPages := int(math.Ceil(float64(total) / float64(limit)))
+
+	sort := c.DefaultQuery("sort", "id")
+	order := c.DefaultQuery("order", "asc")
 	c.JSON(http.StatusOK, gin.H{
-		"data": events,
+		"data":        events,
+		"page":        page,
+		"limit":       limit,
+		"total":       total,
+		"total_pages": totalPages,
+		"sort":        sort,
+		"order":       order,
 	})
 }
 

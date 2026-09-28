@@ -8,4 +8,5 @@ type Phase struct {
 	Slug         string     `json:"slug" gorm:"type:varchar(100);not null"`
 	Events       []Event    `json:"events" gorm:"foreignKey:PhaseID"`
 	HasStanding  bool       `json:"has_standing" gorm:"default:false"`
+	Standings    []Standing `json:"standings" gorm:"foreignKey:PhaseID"`
 }

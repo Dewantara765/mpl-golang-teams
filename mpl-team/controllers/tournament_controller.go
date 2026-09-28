@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,10 +31,16 @@ func FindTournamentBySlug(c *gin.Context) {
 
 	if err := config.DB.Preload("Phases").
 		Preload("Phases.Events").
-		Preload("Phases.Events.Matches").
-		Preload("Phases.Events.Matches.HomeTeam").
-		Preload("Phases.Events.Matches.AwayTeam").
-		Preload("Phases.Events.Matches.Games").First(&tournament, "slug = ?", slug).Error; err != nil {
+		Preload("Phases.Standings", func(db *gorm.DB) *gorm.DB {
+			return db.Order(`
+				match_win DESC,
+				game_diff DESC,
+				game_win DESC,
+				id DESC
+			`)
+		}).
+		Preload("Phases.Standings.Team").
+		First(&tournament, "slug = ?", slug).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Tournament not found"})
 		return
 	}
