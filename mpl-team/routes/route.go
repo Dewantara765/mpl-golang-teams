@@ -9,6 +9,7 @@ import (
 func SetupRoutes(
 	router *gin.Engine,
 	matchController *controllers.MatchController,
+	gameController *controllers.GameController,
 ) {
 
 	team := router.Group("/teams")
@@ -74,7 +75,7 @@ func SetupRoutes(
 	game := router.Group("/games")
 	{
 		game.GET("", controllers.FindGames)
-		game.POST("", controllers.CreateGame)
+		game.POST("", gameController.CreateGame)
 	}
 
 	standing := router.Group("/standings")

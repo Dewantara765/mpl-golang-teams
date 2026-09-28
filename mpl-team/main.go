@@ -29,9 +29,24 @@ func main() {
 	// Connect database and run migration
 	config.ConnectDatabase()
 
+	standingRepository := repositories.NewStandingRepository(config.DB)
+
+	standingService := services.NewStandingService(
+		standingRepository,
+	)
+
 	// Repository
-	matchRepository := repositories.NewMatchRepository()
-	standingRepository := repositories.NewStandingRepository()
+	matchRepository := repositories.NewMatchRepository(config.DB)
+	teamRepository := repositories.NewTeamRepository(config.DB)
+	gameRepository := repositories.NewGameRepository(config.DB)
+
+	gameService := services.NewGameService(
+		config.DB,
+		gameRepository,
+		matchRepository,
+		teamRepository,
+		standingService,
+	)
 
 	// Service
 	matchService := services.NewMatchService(
@@ -44,7 +59,11 @@ func main() {
 		matchService,
 	)
 
-	routes.SetupRoutes(r, matchController)
+	gameController := controllers.NewGameController(
+		gameService,
+	)
+
+	routes.SetupRoutes(r, matchController, gameController)
 	r.Static("/uploads", "./uploads")
 
 	// Start application server on port 8080

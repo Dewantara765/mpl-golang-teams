@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"mpl-team/config"
 	"mpl-team/models"
 
 	"gorm.io/gorm"
@@ -11,9 +10,15 @@ type MatchRepository struct {
 	DB *gorm.DB
 }
 
-func NewMatchRepository() *MatchRepository {
+func NewMatchRepository(db *gorm.DB) *MatchRepository {
 	return &MatchRepository{
-		DB: config.DB,
+		DB: db,
+	}
+}
+
+func (r *MatchRepository) WithTx(tx *gorm.DB) *MatchRepository {
+	return &MatchRepository{
+		DB: tx,
 	}
 }
 
@@ -63,6 +68,40 @@ func (r *MatchRepository) FindByID(id uint) (*models.Match, error) {
 	}
 
 	return &match, nil
+}
+
+func (r *MatchRepository) FindByIDForGame(
+	db *gorm.DB,
+	id uint,
+) (*models.Match, error) {
+
+	var match models.Match
+
+	err := r.DB.
+		Preload("Event").
+		Preload("Games").
+		First(&match, id).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &match, nil
+}
+
+func (r *MatchRepository) UpdateScoreAndStatus(
+	tx *gorm.DB,
+	match *models.Match,
+	homeScore int,
+	awayScore int,
+	status models.MatchStatus,
+) error {
+
+	return tx.Model(match).Updates(map[string]interface{}{
+		"home_score": homeScore,
+		"away_score": awayScore,
+		"status":     status,
+	}).Error
 }
 
 func (r *MatchRepository) FindAll(offset int, limit int) ([]models.Match, int64, error) {

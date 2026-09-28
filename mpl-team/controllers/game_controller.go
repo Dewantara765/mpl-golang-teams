@@ -1,17 +1,27 @@
 package controllers
 
 import (
-	"errors"
-	"fmt"
 	"mpl-team/config"
 	"mpl-team/models"
 	"mpl-team/scopes"
+	"mpl-team/services"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
+
+type GameController struct {
+	GameService *services.GameService
+}
+
+func NewGameController(
+	gameService *services.GameService,
+) *GameController {
+	return &GameController{
+		GameService: gameService,
+	}
+}
 
 func FindGames(c *gin.Context) {
 	var games []models.Game
@@ -42,7 +52,8 @@ func FindGames(c *gin.Context) {
 
 }
 
-func CreateGame(c *gin.Context) {
+func (gc *GameController) CreateGame(c *gin.Context) {
+
 	var input struct {
 		MatchID      uint `json:"match_id"`
 		GameNumber   int  `json:"game_number"`
@@ -57,6 +68,10 @@ func CreateGame(c *gin.Context) {
 		})
 		return
 	}
+
+	// =========================
+	// Basic Validation
+	// =========================
 
 	if input.MatchID == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -86,181 +101,18 @@ func CreateGame(c *gin.Context) {
 		return
 	}
 
-	err := config.DB.Transaction(func(tx *gorm.DB) error {
+	// =========================
+	// Service
+	// =========================
 
-		// =========================
-		// Get Match
-		// =========================
-
-		var match models.Match
-
-		if err := tx.First(&match, input.MatchID).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return fmt.Errorf("match not found")
-			}
-
-			return err
-		}
-
-		// =========================
-		// Check Match Status
-		// =========================
-
-		if match.Status == models.MatchCompleted {
-			return fmt.Errorf("match is already completed")
-		}
-
-		if match.Status == models.MatchCancelled {
-			return fmt.Errorf("match is cancelled")
-		}
-
-		if match.Status == models.MatchPostponed {
-			return fmt.Errorf("match is postponed")
-		}
-
-		// =========================
-		// Validate BestOf
-		// =========================
-
-		if match.BestOf == nil || *match.BestOf <= 0 {
-			return fmt.Errorf("invalid best of")
-		}
-
-		// =========================
-		// Validate Winner
-		// =========================
-
-		if input.WinnerTeamID != match.HomeTeamID &&
-			input.WinnerTeamID != match.AwayTeamID {
-
-			return fmt.Errorf(
-				"winner team must be one of the teams in this match",
-			)
-		}
-
-		// =========================
-		// Validate Winner Team Exists
-		// =========================
-
-		var team models.Team
-
-		if err := tx.First(&team, input.WinnerTeamID).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return fmt.Errorf("winner team not found")
-			}
-
-			return err
-		}
-
-		// =========================
-		// Calculate Required Wins
-		// =========================
-
-		winsNeeded := (*match.BestOf / 2) + 1
-
-		// =========================
-		// Get Existing Games
-		// =========================
-
-		var games []models.Game
-
-		if err := tx.
-			Where("match_id = ?", match.ID).
-			Order("game_number ASC").
-			Find(&games).Error; err != nil {
-			return err
-		}
-
-		// =========================
-		// Validate Game Number
-		// =========================
-
-		if input.GameNumber != len(games)+1 {
-			return fmt.Errorf(
-				"game number must be %d",
-				len(games)+1,
-			)
-		}
-
-		// =========================
-		// Check Maximum Games
-		// =========================
-
-		if len(games) >= *match.BestOf {
-			return fmt.Errorf("maximum number of games reached")
-		}
-
-		// =========================
-		// Create Game
-		// =========================
-
-		game := models.Game{
+	game, err := gc.GameService.CreateGame(
+		services.CreateGameInput{
 			MatchID:      input.MatchID,
 			GameNumber:   input.GameNumber,
 			Duration:     input.Duration,
 			WinnerTeamID: input.WinnerTeamID,
-		}
-
-		if err := tx.Create(&game).Error; err != nil {
-			return err
-		}
-
-		// =========================
-		// Calculate Score
-		// =========================
-
-		homeScore := 0
-		awayScore := 0
-
-		for _, g := range games {
-			if g.WinnerTeamID == match.HomeTeamID {
-				homeScore++
-			}
-
-			if g.WinnerTeamID == match.AwayTeamID {
-				awayScore++
-			}
-		}
-
-		// Tambahkan game yang baru dibuat
-		if input.WinnerTeamID == match.HomeTeamID {
-			homeScore++
-		}
-
-		if input.WinnerTeamID == match.AwayTeamID {
-			awayScore++
-		}
-
-		// =========================
-		// Determine Status
-		// =========================
-
-		status := models.MatchLive
-
-		if homeScore >= winsNeeded ||
-			awayScore >= winsNeeded {
-
-			status = models.MatchCompleted
-		}
-
-		// =========================
-		// Update Match
-		// =========================
-
-		if err := tx.Model(&match).Updates(map[string]interface{}{
-			"home_score": homeScore,
-			"away_score": awayScore,
-			"status":     status,
-		}).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	// =========================
-	// Handle Error
-	// =========================
+		},
+	)
 
 	if err != nil {
 
@@ -282,26 +134,6 @@ func CreateGame(c *gin.Context) {
 			})
 		}
 
-		return
-	}
-
-	// =========================
-	// Get Created Game
-	// =========================
-
-	var game models.Game
-
-	if err := config.DB.
-		Preload("WinnerTeam").
-		First(&game, "match_id = ? AND game_number = ?",
-			input.MatchID,
-			input.GameNumber,
-		).Error; err != nil {
-
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Game created but failed to retrieve game",
-			"error":   err.Error(),
-		})
 		return
 	}
 

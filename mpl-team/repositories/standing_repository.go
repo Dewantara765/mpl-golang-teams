@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"mpl-team/config"
 	"mpl-team/models"
 
 	"gorm.io/gorm"
@@ -11,9 +10,9 @@ type StandingRepository struct {
 	DB *gorm.DB
 }
 
-func NewStandingRepository() *StandingRepository {
+func NewStandingRepository(db *gorm.DB) *StandingRepository {
 	return &StandingRepository{
-		DB: config.DB,
+		DB: db,
 	}
 }
 
@@ -69,4 +68,42 @@ func (r *StandingRepository) UpdateAfterMatch(
 	}
 
 	return nil
+}
+
+func (r *StandingRepository) FindByTeamAndPhase(
+	tx *gorm.DB,
+	teamID uint,
+	phaseID uint,
+) (*models.Standing, error) {
+
+	var standing models.Standing
+
+	err := tx.
+		Where(
+			"team_id = ? AND phase_id = ?",
+			teamID,
+			phaseID,
+		).
+		First(&standing).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &standing, nil
+}
+
+func (r *StandingRepository) Update(
+	tx *gorm.DB,
+	standing *models.Standing,
+) error {
+
+	return tx.Model(standing).Updates(map[string]interface{}{
+		"match_played": standing.MatchPlayed,
+		"match_win":    standing.MatchWin,
+		"match_lose":   standing.MatchLose,
+		"game_win":     standing.GameWin,
+		"game_lose":    standing.GameLose,
+		"game_diff":    standing.GameDiff,
+	}).Error
 }
