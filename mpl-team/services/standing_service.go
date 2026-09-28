@@ -27,6 +27,10 @@ func (s *StandingService) UpdateFromCompletedMatch(
 	match *models.Match,
 ) error {
 
+	if !match.Event.Phase.HasStanding {
+		return nil
+	}
+
 	if match.Status != models.MatchCompleted {
 		return fmt.Errorf("match is not completed")
 	}
