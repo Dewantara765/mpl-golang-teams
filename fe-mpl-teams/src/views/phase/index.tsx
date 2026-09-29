@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react'
 import {api} from '../../services/api.ts'
-import {useParams} from 'react-router-dom'
+import {Link, useParams} from 'react-router-dom'
 
 export default function MatchIndex() {
     const [tournament, setTournament] = useState<Tournament | null>(null);
@@ -40,6 +40,7 @@ export default function MatchIndex() {
         name: string;
         slug: string;
         standings: Standing[];
+        team: Team;
     }
 
 
@@ -53,7 +54,7 @@ export default function MatchIndex() {
     useEffect(() => {
         const fetchTournaments = async () => {
             try {
-                const response = await api.get(`/tournaments/${slug}`);
+                const response = await api.get(`/tournaments/slug/${slug}`);
                 setTournament(response.data.data);
             } catch (error) {
                 console.error('Error fetching tournament:', error);
@@ -69,6 +70,7 @@ export default function MatchIndex() {
                 <div className='header-title'>{tournament?.name}</div>
                 {tournament?.phases.map((phase) => (
                     <div key={phase.id}>{phase.name}
+                    <div><Link to={`${phase.slug}`} className='underline text-blue-500'>Lihat Match {phase.name}</Link></div>
                     {phase.name.toLowerCase() !== "playoff" && (
                     <table className="table-auto border-collapse border border-gray-300 mt-4 p-2">
                     <thead>

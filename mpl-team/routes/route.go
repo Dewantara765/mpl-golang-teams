@@ -24,11 +24,13 @@ func SetupRoutes(
 	tournament := router.Group("/tournaments")
 	{
 		tournament.GET("", controllers.FindTournaments)
-		tournament.GET("/:slug", controllers.FindTournamentBySlug)
+		tournament.GET("/:tournamentSlug/phases/:phaseSlug", controllers.FindPhaseWithMatches)
+		tournament.GET("/slug/:slug", controllers.FindTournamentBySlug)
 		tournament.GET("/db/:id", controllers.FindTournamentByID)
 		tournament.POST("", controllers.CreateTournament)
 		tournament.PUT("/:id", controllers.UpdateTournament)
 		tournament.DELETE("/:id", controllers.DeleteTournament)
+
 	}
 
 	phase := router.Group("/phases")

@@ -28,6 +28,7 @@ import HeroEdit from '../views/dashboard/hero/edit.tsx'
 import DashboardMatchShow from '../views/dashboard/match/show.tsx'
 import GameCreate from '../views/dashboard/game/create.tsx'
 import DashboardStandingIndex from '../views/dashboard/standing/index.tsx'
+import PhaseMatches from '../views/phase/match.tsx'
     
 export default function AppRoutes() {
   return (
@@ -38,6 +39,7 @@ export default function AppRoutes() {
         <Route path="/tournament" element={<TournamentIndex />} />
         <Route path="/tournament/:slug" element={<MatchIndex />} />
         <Route path="/heroes" element={<HeroIndex/>}/>
+        <Route path="/tournament/:slug/:phaseSlug" element={<PhaseMatches/>}/>
         
       </Route>
       <Route element={<DashboardLayout />}>

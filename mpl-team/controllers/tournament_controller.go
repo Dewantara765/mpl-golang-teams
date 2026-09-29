@@ -25,6 +25,33 @@ func FindTournaments(c *gin.Context) {
 	})
 }
 
+func FindPhaseWithMatches(c *gin.Context) {
+	tournamentSlug := c.Param("tournamentSlug")
+	phaseSlug := c.Param("phaseSlug")
+
+	var phase models.Phase
+
+	err := config.DB.
+		Joins("JOIN tournaments ON tournaments.id = phases.tournament_id").
+		Where("tournaments.slug = ?", tournamentSlug).
+		Where("phases.slug = ?", phaseSlug).
+		Preload("Events").
+		Preload("Events.Matches").
+		Preload("Events.Matches.HomeTeam").
+		Preload("Events.Matches.AwayTeam").
+		Preload("Events.Matches.Games").
+		First(&phase).Error
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Phase not found",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, phase)
+}
+
 func FindTournamentBySlug(c *gin.Context) {
 	slug := c.Param("slug")
 	var tournament models.Tournament
