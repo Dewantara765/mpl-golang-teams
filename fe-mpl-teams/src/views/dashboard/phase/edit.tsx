@@ -5,8 +5,7 @@ export default function PhaseEdit() {
         const { id } = useParams<{ id: string }>();
         const [name, setName] = useState<string>("")
         const [slug, setSlug] = useState<string>("")
-        const [tournaments, setTournaments] = useState<Tournament[]>([])
-        const [tournament_id, setTournamentId] = useState<number>(0);
+        const [hasStanding, setHasStanding] = useState<boolean>(false)
         const [errors, setErrors] = useState<{name?: string, slug?: string, tournament_id?: string}>({})
         const navigate = useNavigate()
     
@@ -16,16 +15,6 @@ export default function PhaseEdit() {
         }
     useEffect(() => {
         document.title = "Edit Phase"
-        const fetchTournaments = async() => {
-                    try {
-                        const response = await api.get("/tournaments")
-                        setTournaments(response.data.data)
-                    }catch (error : any) {
-                        if (error.response && error.response.data && error.response.data.errors) {
-                        setErrors(error.response.data.errors)
-                    }
-                    }
-                };
                 
 
         const fetchPhase = async() => {
@@ -33,7 +22,7 @@ export default function PhaseEdit() {
                 const response = await api.get(`/phases/${id}`)
                 setName(response.data.data.name)
                 setSlug(response.data.data.slug)
-                setTournamentId(response.data.data.tournament_id)
+                setHasStanding(response.data.data.has_standing)
             }catch (error : any) {
                 if (error.response && error.response.data && error.response.data.errors) {
                     setErrors(error.response.data.errors)
@@ -41,12 +30,11 @@ export default function PhaseEdit() {
             }
         };
         fetchPhase()
-        fetchTournaments()
     },[id])
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        const data = {name, slug, tournament_id}
+        const data = {name, slug, has_standing: hasStanding}
         try {
             await api.put(`/phases/${id}`, data, {
                 headers: {"Content-Type" : "application/json"},}
@@ -76,17 +64,10 @@ export default function PhaseEdit() {
                     
                 </div>
                 <div className="flex gap-2 items-center">
-                    <label htmlFor="tournaments" className="block input-label">Tournament</label>
-                    <select name="tournaments" id="tournaments" value={tournament_id} className="mt-1 block w-50 select-field"
-                    onChange={(e) => setTournamentId(Number(e.target.value))}>
-                        <option value="">Pilih Tournament..</option>
-                    {tournaments.map((tournament) => (
-                        <option key={tournament.id} value={tournament.id}>{tournament.name}</option>
-                    )
-
-                    )}
-                    </select>
-                    
+                    <label htmlFor="has_standing" className="block input-label">Has Standing</label>
+                    <input type="checkbox" id="has_standing" className="mt-1 block w-50 input-field" 
+                    checked={hasStanding}
+                    onChange={(e) => setHasStanding(e.target.checked)} />
                 </div>
                 
                 <button type="submit" className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Update Phase</button>

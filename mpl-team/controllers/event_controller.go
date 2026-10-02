@@ -7,6 +7,7 @@ import (
 	"mpl-team/scopes"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +17,7 @@ func FindEvents(c *gin.Context) {
 
 	var total int64
 
+	search := strings.TrimSpace(c.DefaultQuery("search", ""))
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "7"))
 
@@ -32,11 +34,16 @@ func FindEvents(c *gin.Context) {
 	query := config.DB.Model(&models.Event{})
 	query = query.Scopes(scopes.Sort(c))
 
+	if search != "" {
+		query = query.Where("name LIKE ?", "%"+search+"%")
+	}
+
 	query.Count(&total)
 	if err := query.
 		Limit(limit).
 		Offset(offset).
 		Preload("Phase").
+		Preload("Phase.Tournament").
 		Find(&events).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to retrieve events"})

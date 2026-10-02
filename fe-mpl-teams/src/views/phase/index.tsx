@@ -72,15 +72,15 @@ export default function MatchIndex() {
                     <div key={phase.id}>{phase.name}
                     <div><Link to={`${phase.slug}`} className='underline text-blue-500'>Lihat Match {phase.name}</Link></div>
                     {phase.name.toLowerCase() !== "playoff" && (
-                    <table className="table-auto border-collapse border border-gray-300 mt-4 p-2">
+                    <table className="table-auto border-collapse border border-gray-500 mt-4 p-2">
                     <thead>
                         <tr>
-                            <th className="border border-gray-300 px-4 py-2">No</th>
-                            <th className="border border-gray-300 px-4 py-2">Team </th>
-                            <th className="border border-gray-300 px-4 py-2">MP</th>
-                            <th className="border border-gray-300 px-4 py-2">MW-ML</th>
-                            <th className="border border-gray-300 px-4 py-2">GW-GL</th>
-                            <th className="border border-gray-300 px-4 py-2">GD</th>
+                            <th className="border border-gray-500 px-4 py-2">No</th>
+                            <th className="border border-gray-500 px-4 py-2">Team </th>
+                            <th className="border border-gray-500 px-4 py-2">MP</th>
+                            <th className="border border-gray-500 px-4 py-2">MW-ML</th>
+                            <th className="border border-gray-500 px-4 py-2">GW-GL</th>
+                            <th className="border border-gray-500 px-4 py-2">GD</th>
                         </tr>
 
                     </thead>

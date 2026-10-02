@@ -1,13 +1,15 @@
 import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../../services/api";
-
+import Select from "react-select";
+import AsyncSelect from "react-select/async";
 export default function CreateMatch() {
     const [teams, setTeams] = useState<Team[]>([]);
     const [events, setEvents] = useState<Event[]>([]);
     const [home_team_id, setHomeTeamId] = useState<number>(0);
     const [away_team_id, setAwayTeamId] = useState<number>(0);
     const [event_id, setEventId] = useState<number>(0);
+    const [selectedEvent, setSelectedEvent] = useState<EventOption | null>(null);
     // const [home_score, setHomeScore] = useState<number >(0);
     // const [away_score, setAwayScore] = useState<number>(0);
     const [date, setDate] = useState<string>("");
@@ -60,7 +62,7 @@ export default function CreateMatch() {
         const data = {
             home_team_id,
             away_team_id,
-            event_id,
+            event_id: selectedEvent?.value,
             date,
             time: formattedTime,
             best_of,
@@ -72,6 +74,31 @@ export default function CreateMatch() {
             console.error("Error creating match:", error);
         }
     };
+
+    interface EventOption {
+        value: number;
+        label: string;
+    }
+
+    const loadEvents = async (
+        inputValue: string
+    ): Promise<EventOption[]> => {
+        const response = await api.get("/events", {
+            params: {
+                search: inputValue,
+                page: 1,
+                limit: 7,
+            },
+        });
+
+        const events: Event[] = response.data.data;
+
+        return events.map((event) => ({
+            value: event.id,
+            label: `${event.name} - ${event.phase.name} - ${event.phase.tournament.name}`,
+        }));
+    };
+
     return (
         <div className='p-4'>
             <p className="font-semibold text-xl mb-3">Create Match Page</p>
@@ -101,31 +128,21 @@ export default function CreateMatch() {
                 
                 <div className="flex gap-2 items-center">
                     <label htmlFor="event" className="input-label">Event</label>
-                    <select name="event" id="event" value={event_id} className="w-80 select-field"
-                    onChange={(e) => setEventId(Number(e.target.value))}>
-                        <option value="">Pilih Event..</option>
-                    {events.map((event) => (
-                        <option key={event.id} value={event.id}>{event.name} - {event.phase.tournament.name}</option>
-                    ))}
-                    
-                    </select>
+                    <AsyncSelect<EventOption>
+                            loadOptions={loadEvents}
+                            placeholder="Cari event..."
+                            value={selectedEvent}
+                            onChange={setSelectedEvent}
+                            isSearchable
+                            cacheOptions
+                            defaultOptions
+                        />
                 </div>
                 <div className="flex gap-2 items-center">
                     <label htmlFor="best_of" className="input-label">Best Of</label>
                     <input value={best_of} type="number" id="best_of" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setBestOf(Number(e.target.value))} />
                 </div>
-
-                {/* <div className="flex gap-2 items-center">
-                    <label htmlFor="home_score" className="input-label">Home Score</label>
-                    <input value={home_score} type="number" id="home_score" className="mt-1 block w-50 input-field" 
-                    onChange={(e) => setHomeScore(Number(e.target.value))} />
-                </div>
-                <div className="flex gap-2 items-center">
-                    <label htmlFor="away_score" className="input-label">Away Score</label>
-                    <input value={away_score} type="number" id="away_score" className="mt-1 block w-50 input-field" 
-                    onChange={(e) => setAwayScore(Number(e.target.value))} />
-                </div> */}
                 <div className="flex gap-2 items-center">
                     <label htmlFor="date" className="input-label">Date</label>
                     <input value={date} type="date" id="date" className="mt-1 block w-50 input-field" 

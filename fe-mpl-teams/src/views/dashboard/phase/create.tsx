@@ -5,6 +5,7 @@ export default function PhaseCreate(){
     const [name, setName] = useState<string>("")
     const [slug, setSlug] = useState<string>("")
     const [tournaments, setTournaments] = useState<Tournament[]>([])
+    const [hasStanding, setHasStanding] = useState<boolean>(false)
     const [tournament_id, setTournamentId] = useState<number>(0);
     const [errors, setErrors] = useState<{name?: string, slug?: string, tournament_id?: string}>({})
     const navigate = useNavigate()
@@ -30,7 +31,7 @@ export default function PhaseCreate(){
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        const data = {name, slug, tournament_id}
+        const data = {name, slug, tournament_id, has_standing: hasStanding}
         try {
             await api.post("/phases", data, {
                 headers: {"Content-Type" : "application/json"},}
@@ -59,6 +60,12 @@ export default function PhaseCreate(){
                     <input value={slug} type="text" id="slug" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setSlug(e.target.value)} />
                     {errors.slug && <p className="text-red-500 text-sm">{errors.slug}</p>}
+                </div>
+                <div className="flex gap-2 items-center">
+                    <label htmlFor="has_standing" className="block input-label">Has Standing</label>
+                    <input type="checkbox" id="has_standing" className="mt-1 block w-50 input-field" 
+                    checked={hasStanding}
+                    onChange={(e) => setHasStanding(e.target.checked)} />
                 </div>
                 <div className="flex gap-2 items-center">
                     <label htmlFor="tournaments" className="block input-label">Tournament</label>

@@ -33,11 +33,11 @@ a.active {
 }
 
 .table-cell {
-  @apply border border-gray-300 px-4 py-2;
+  @apply border border-gray-500 px-4 py-2;
 }
 
 .table-container {
-  @apply table-auto border-collapse border border-gray-300 m-4 p-2;
+  @apply table-auto border-collapse border border-gray-500 m-4 p-2;
 }
 
 .input-container {

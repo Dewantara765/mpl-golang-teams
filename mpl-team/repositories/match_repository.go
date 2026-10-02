@@ -78,8 +78,10 @@ func (r *MatchRepository) FindByIDForGame(
 	var match models.Match
 
 	err := r.DB.
+		Preload("HomeTeam").
+		Preload("AwayTeam").
 		Preload("Event").
-		Preload("Games").
+		Preload("Event.Phase").
 		First(&match, id).Error
 
 	if err != nil {
