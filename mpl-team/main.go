@@ -35,6 +35,13 @@ func main() {
 		standingRepository,
 	)
 
+	heroDraftRepo := repositories.NewHeroDraftRepository()
+
+	heroDraftService := services.NewHeroDraftService(
+		config.DB,
+		heroDraftRepo,
+	)
+
 	// Repository
 	matchRepository := repositories.NewMatchRepository(config.DB)
 	teamRepository := repositories.NewTeamRepository(config.DB)
@@ -63,7 +70,11 @@ func main() {
 		gameService,
 	)
 
-	routes.SetupRoutes(r, matchController, gameController)
+	heroDraftController := controllers.NewHeroDraftController(
+		heroDraftService,
+	)
+
+	routes.SetupRoutes(r, matchController, gameController, heroDraftController)
 	r.Static("/uploads", "./uploads")
 
 	// Start application server on port 8080

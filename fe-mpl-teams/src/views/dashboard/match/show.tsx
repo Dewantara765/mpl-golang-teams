@@ -19,6 +19,32 @@ export default function DashboardMatchShow(){
     const [phase_name, setPhaseName] = useState<string>("");
     const [tournament_name, setTournamentName] = useState<string>("");
     const [games, setGames] = useState<Game[]>([]);
+    const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+    const [showDraft, setShowDraft] = useState<boolean>(false);
+    const [drafts, setDrafts] = useState<Draft[]>([]);
+
+    const bans = drafts.filter(draft => draft.type === "ban");
+    const picks = drafts.filter(draft => draft.type === "pick");
+
+    interface Draft {
+        id: number,
+        game: {
+            id: number,
+            game_number: number,
+        }
+        team: {
+            id: number,
+            name: string,
+            short_name: string,
+            logo: string
+        }
+        hero: {
+            id: number,
+            name: string,
+            logo: string
+        }
+        type: string,
+    }
 
     interface Game {
         id: number,
@@ -75,6 +101,16 @@ export default function DashboardMatchShow(){
         fetchMatch()
         
     },[])
+        const fetchHeroDrafts = async (gameId: number) => {
+        try {
+            const response = await api.get(`hero-drafts/games/${gameId}`);
+            setDrafts(response.data);
+            
+
+        } catch (error) {
+            console.error("Error fetching hero drafts:", error);
+        }
+    };
     return (     
         <div className="p-4">
             <title>Dashboard - Match details </title>
@@ -133,6 +169,7 @@ export default function DashboardMatchShow(){
                         <th className="table-cell">Game</th>
                         <th className="table-cell">Durasi</th>
                         <th className="table-cell">Pemenang</th>
+                        <th className="table-cell">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -142,6 +179,19 @@ export default function DashboardMatchShow(){
                             <td className="table-cell">{convertDuration(game.duration)}</td>
                             <td className="table-cell">
                                 {game.winner_team.short_name}</td>
+                            <td className="table-cell">
+                                <Link to={`/dashboard/match/${id}/game/${game.id}/create`} className="button">
+                                    Add Draft
+                                </Link>
+                                <button className="show-button"
+                                onClick={() => {
+                                    setSelectedGame(game)
+                                    fetchHeroDrafts(game.id)
+                                    setShowDraft(true);
+                                    }}>
+                                    Show Draft
+                                </button>
+                            </td>
                         </tr>
                     )
 
@@ -151,6 +201,72 @@ export default function DashboardMatchShow(){
             </table> 
             
             <Link to={`/dashboard/match/${id}/create`} className="button">Buat game</Link>
+            {showDraft && selectedGame && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+                <div className="bg-white p-6 rounded-lg w-[700px]">
+
+                    <h2 className="text-xl font-bold mb-6">
+                        Game {selectedGame.game_number} - Hero Draft
+                    </h2>
+
+                    <h3 className="font-bold mb-3">
+                        Ban
+                    </h3>
+
+                    <div className="grid grid-cols-5 gap-3 mb-6">
+                        {bans.map(draft => (
+                            <div key={draft.id}>
+                                <img
+                                    src={`http://localhost:8080/${draft.hero.logo}`}
+                                    alt={draft.hero.name}
+                                    className="w-16 h-16 object-cover rounded grayscale"
+                                />
+
+                                <p className="text-xs">
+                                    {draft.hero.name}
+                                </p>
+
+                                <p className="text-xs text-gray-500">
+                                    {draft.team.short_name}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <h3 className="font-bold mb-3">
+                        Pick
+                    </h3>
+
+                    <div className="grid grid-cols-5 gap-3">
+                        {picks.map(draft => (
+                            <div key={draft.id}>
+                                <img
+                                    src={`http://localhost:8080/${draft.hero.logo}`}
+                                    alt={draft.hero.name}
+                                    className="w-16 h-16 object-cover rounded"
+                                />
+
+                                <p className="text-xs">
+                                    {draft.hero.name}
+                                </p>
+
+                                <p className="text-xs text-gray-500">
+                                    {draft.team.short_name}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <button
+                        onClick={() => setShowDraft(false)}
+                        className="mt-6 bg-gray-500 text-white px-4 py-2 rounded"
+                    >
+                        Tutup
+                    </button>
+
+                </div>
+            </div>
+        )}
             
         </div>
     )

@@ -50,6 +50,15 @@ export default function PhaseMatches(){
         match: Match,
         winner_team: Team,
         duration: number,
+        hero_draft: HeroDraft[],
+    }
+
+    interface HeroDraft {
+        id: number,
+        game: Game,
+        team_id: number,
+        hero_id: number,
+        type: string,
     }
 
 
@@ -152,34 +161,145 @@ export default function PhaseMatches(){
 
                             {/* Games */}
                             <div className="mt-4 space-y-3">
-                                {selectedMatch.games.map((game) => (
-                                    <div
-                                        key={game.id}
-                                        className="rounded-lg border p-4"
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-semibold">
-                                                Game {game.game_number}
-                                            </span>
+                                {selectedMatch.games.map((game) => {
+                                    const homePicks = game.hero_draft?.filter(
+                                        (draft) =>
+                                            draft.team_id === selectedMatch.home_team.id &&
+                                            draft.type === "pick"
+                                    );
 
-                                            <span className="text-sm text-gray-500">
-                                                {convertDuration(game.duration)}
-                                            </span>
-                                        </div>
+                                    const awayPicks = game.hero_draft?.filter(
+                                        (draft) =>
+                                            draft.team_id === selectedMatch.away_team.id &&
+                                            draft.type === "pick"
+                                    );
 
-                                        <div className="mt-2">
-                                            {game.winner_team_id === selectedMatch.home_team.id ? (
-                                                <span>
-                                                    {selectedMatch.home_team.short_name} Menang
+                                    const homeBans = game.hero_draft?.filter(
+                                        (draft) =>
+                                            draft.team_id === selectedMatch.home_team.id &&
+                                            draft.type === "ban"
+                                    );
+
+                                    const awayBans = game.hero_draft?.filter(
+                                        (draft) =>
+                                            draft.team_id === selectedMatch.away_team.id &&
+                                            draft.type === "ban"
+                                    );
+
+                                    return (
+                                        <div
+                                            key={game.id}
+                                            className="rounded-lg border p-4"
+                                        >
+                                            {/* Game Header */}
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-semibold">
+                                                    Game {game.game_number}
                                                 </span>
-                                            ) : (
-                                                <span>
-                                                    {selectedMatch.away_team.short_name} Menang
+
+                                                <span className="text-sm text-gray-500">
+                                                    {convertDuration(game.duration)}
                                                 </span>
-                                            )}
+                                            </div>
+
+                                            {/* Teams */}
+                                            <div className="mt-4 grid grid-cols-2 gap-6">
+
+                                                {/* HOME */}
+                                                <div>
+                                                    <h3 className="font-semibold">
+                                                        {selectedMatch.home_team.short_name}
+                                                    </h3>
+
+                                                    {/* Picks */}
+                                                    <p className="mt-3 text-xs font-semibold text-gray-500">
+                                                        PICK
+                                                    </p>
+
+                                                    <div className="mt-2 flex flex-wrap gap-2">
+                                                        {homePicks.map((draft) => (
+                                                            <img
+                                                                key={draft.id}
+                                                                src={`http://localhost:8080/${draft.hero.logo}`}
+                                                                alt={draft.hero.name}
+                                                                title={draft.hero.name}
+                                                                className="h-10 w-10 rounded"
+                                                            />
+                                                        ))}
+                                                    </div>
+
+                                                    {/* Bans */}
+                                                    <p className="mt-4 text-xs font-semibold text-gray-500">
+                                                        BAN
+                                                    </p>
+
+                                                    <div className="mt-2 flex flex-wrap gap-2">
+                                                        {homeBans.map((draft) => (
+                                                            <img
+                                                                key={draft.id}
+                                                                src={`http://localhost:8080/${draft.hero.logo}`}
+                                                                alt={draft.hero.name}
+                                                                title={draft.hero.name}
+                                                                className="h-10 w-10 rounded grayscale"
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {/* AWAY */}
+                                                <div>
+                                                    <h3 className="font-semibold">
+                                                        {selectedMatch.away_team.short_name}
+                                                    </h3>
+
+                                                    {/* Picks */}
+                                                    <p className="mt-3 text-xs font-semibold text-gray-500">
+                                                        PICK
+                                                    </p>
+
+                                                    <div className="mt-2 flex flex-wrap gap-2">
+                                                        {awayPicks.map((draft) => (
+                                                            <img
+                                                                key={draft.id}
+                                                                src={`http://localhost:8080/${draft.hero.logo}`}
+                                                                alt={draft.hero.name}
+                                                                title={draft.hero.name}
+                                                                className="h-10 w-10 rounded"
+                                                            />
+                                                        ))}
+                                                    </div>
+
+                                                    {/* Bans */}
+                                                    <p className="mt-4 text-xs font-semibold text-gray-500">
+                                                        BAN
+                                                    </p>
+
+                                                    <div className="mt-2 flex flex-wrap gap-2">
+                                                        {awayBans.map((draft) => (
+                                                            <img
+                                                                key={draft.id}
+                                                                src={`http://localhost:8080/${draft.hero.logo}`}
+                                                                alt={draft.hero.name}
+                                                                title={draft.hero.name}
+                                                                className="h-10 w-10 rounded grayscale"
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Winner */}
+                                            <div className="mt-4 border-t pt-3 text-sm">
+                                                <span className="font-semibold">
+                                                    {game.winner_team_id === selectedMatch.home_team.id
+                                                        ? selectedMatch.home_team.short_name
+                                                        : selectedMatch.away_team.short_name}
+                                                </span>{" "}
+                                                Menang
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>

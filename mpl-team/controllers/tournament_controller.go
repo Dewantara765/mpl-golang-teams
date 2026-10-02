@@ -40,6 +40,8 @@ func FindPhaseWithMatches(c *gin.Context) {
 		Preload("Events.Matches.HomeTeam").
 		Preload("Events.Matches.AwayTeam").
 		Preload("Events.Matches.Games").
+		Preload("Events.Matches.Games.HeroDrafts").
+		Preload("Events.Matches.Games.HeroDrafts.Hero").
 		First(&phase).Error
 
 	if err != nil {

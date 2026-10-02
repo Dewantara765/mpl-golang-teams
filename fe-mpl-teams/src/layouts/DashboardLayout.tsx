@@ -2,8 +2,8 @@ import { NavLink, Outlet } from "react-router-dom";
 
 export default function DashboardLayout(){
     return (
-        <div className="w-full flex">
-            <div className="w-1/8 h-screen font-semibold text-white bg-red-500 ">
+        <div className="min-h-screen flex">
+            <div className="w-60 min-h-screen font-semibold text-white bg-red-500 ">
                 <div className="flex flex-col  items-center h-full px-4">
                     <div className="mb-4 font-bold text-lg">Dashboard</div>
                     <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/team">Team</NavLink>
@@ -15,9 +15,9 @@ export default function DashboardLayout(){
                     <NavLink className={({ isActive }) => isActive ? "bg-blue-500 rounded-sm p-0.5" : ""} to="/dashboard/standing">Standing</NavLink>
                 </div>
             </div>
-            <div className="w-7/8 h-screen">
+            <main className="flex-1 p-4">
                 <Outlet />
-            </div>              
+            </main>              
             
         </div>
         

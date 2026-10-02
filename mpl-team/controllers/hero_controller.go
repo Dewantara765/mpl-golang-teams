@@ -80,8 +80,9 @@ func saveHeroLogo(c *gin.Context, fileHeader *multipart.FileHeader) (string, err
 
 func FindHeroes(c *gin.Context) {
 	var heroes []models.Hero
-
 	var total int64
+
+	all := c.DefaultQuery("all", "false") == "true"
 
 	search := strings.TrimSpace(c.DefaultQuery("search", ""))
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -95,8 +96,6 @@ func FindHeroes(c *gin.Context) {
 		limit = 7
 	}
 
-	offset := (page - 1) * limit
-
 	query := config.DB.Model(&models.Hero{})
 
 	if search != "" {
@@ -105,13 +104,41 @@ func FindHeroes(c *gin.Context) {
 
 	query = query.Scopes(scopes.Sort(c))
 
-	query.Count(&total)
+	// Mode all
+	if all {
+		if err := query.Find(&heroes).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Failed to retrieve heroes",
+			})
+			return
+		}
+
+		total = int64(len(heroes))
+
+		c.JSON(http.StatusOK, gin.H{
+			"data":  heroes,
+			"total": total,
+		})
+		return
+	}
+
+	// Mode pagination
+	if err := query.Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to count heroes",
+		})
+		return
+	}
+
+	offset := (page - 1) * limit
+
 	if err := query.
 		Limit(limit).
 		Offset(offset).
 		Find(&heroes).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to retrieve heroes"})
+			"error": "Failed to retrieve heroes",
+		})
 		return
 	}
 
@@ -119,6 +146,7 @@ func FindHeroes(c *gin.Context) {
 
 	sort := c.DefaultQuery("sort", "id")
 	order := c.DefaultQuery("order", "asc")
+
 	c.JSON(http.StatusOK, gin.H{
 		"data":        heroes,
 		"page":        page,

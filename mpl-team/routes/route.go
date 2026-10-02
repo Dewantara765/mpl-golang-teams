@@ -10,6 +10,7 @@ func SetupRoutes(
 	router *gin.Engine,
 	matchController *controllers.MatchController,
 	gameController *controllers.GameController,
+	heroDraftController *controllers.HeroDraftController,
 ) {
 
 	team := router.Group("/teams")
@@ -84,5 +85,20 @@ func SetupRoutes(
 	{
 		standing.GET("", controllers.FindStandings)
 		standing.POST("", controllers.CreateStanding)
+	}
+
+	heroDraft := router.Group("/hero-drafts")
+	{
+		heroDraft.POST("", heroDraftController.Create)
+
+		heroDraft.GET(
+			"/games/:gameID",
+			heroDraftController.FindByGameID,
+		)
+
+		heroDraft.DELETE(
+			"/:id",
+			heroDraftController.Delete,
+		)
 	}
 }
