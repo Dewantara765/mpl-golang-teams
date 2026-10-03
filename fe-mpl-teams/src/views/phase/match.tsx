@@ -14,6 +14,7 @@ export default function PhaseMatches(){
     const [phase, setPhase] = useState<Phase[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+    const [showBans, setShowBans] = useState<Record<number, boolean>>({});
 
     interface Phase {
         id: number,
@@ -164,19 +165,19 @@ export default function PhaseMatches(){
                             <div className="mt-4 space-y-3">
                                 {selectedMatch.games.map((game) => {
                                     const homePicks = game.hero_drafts?.filter(
-                                        (draft) =>
+                                        (draft : any) =>
                                             draft.team_id === selectedMatch.home_team.id &&
                                             draft.type === "pick"
                                     );
 
                                     const awayPicks = game.hero_drafts?.filter(
-                                        (draft) =>
+                                        (draft : any) =>
                                             draft.team_id === selectedMatch.away_team.id &&
                                             draft.type === "pick"
                                     );
 
                                     const homeBans = game.hero_drafts?.filter(
-                                        (draft) =>
+                                        (draft : any) =>
                                             draft.team_id === selectedMatch.home_team.id &&
                                             draft.type === "ban"
                                     );
@@ -220,33 +221,21 @@ export default function PhaseMatches(){
                                                     </p>
 
                                                     <div className="mt-2 flex flex-wrap gap-2">
-                                                        {homePicks.map((draft) => (
+                                                        {homePicks.map((draft : any) => (
                                                             <img
                                                                 key={draft.id}
                                                                 src={`http://localhost:8080/${draft.hero.logo}`}
                                                                 alt={draft.hero.name}
                                                                 title={draft.hero.name}
-                                                                className="h-10 w-10 rounded"
+                                                                className={`h-10 w-10 rounded ${game?.first_pick_team_id === selectedMatch.home_team.id ? 'ring-3 ring-blue-500' : 'ring-3 ring-red-500'}`}
                                                             />
                                                         ))}
                                                     </div>
 
                                                     {/* Bans */}
-                                                    <p className="mt-4 text-xs font-semibold text-gray-500">
-                                                        BAN
-                                                    </p>
-
-                                                    <div className="mt-2 flex flex-wrap gap-2">
-                                                        {homeBans.map((draft) => (
-                                                            <img
-                                                                key={draft.id}
-                                                                src={`http://localhost:8080/${draft.hero.logo}`}
-                                                                alt={draft.hero.name}
-                                                                title={draft.hero.name}
-                                                                className="h-10 w-10 rounded grayscale"
-                                                            />
-                                                        ))}
-                                                    </div>
+                                                    
+                                                    
+                                                    
                                                 </div>
 
                                                 {/* AWAY */}
@@ -266,45 +255,82 @@ export default function PhaseMatches(){
                                                     </p>
 
                                                     <div className="mt-2 flex flex-wrap gap-2">
-                                                        {awayPicks.map((draft) => (
+                                                        {awayPicks.map((draft : any) => (
                                                             <img
                                                                 key={draft.id}
                                                                 src={`http://localhost:8080/${draft.hero.logo}`}
                                                                 alt={draft.hero.name}
                                                                 title={draft.hero.name}
-                                                                className="h-10 w-10 rounded"
+                                                                className={`h-10 w-10 rounded ${game?.first_pick_team_id === selectedMatch.away_team.id ? 'ring-3 ring-blue-500' : 'ring-3 ring-red-500'}`}
                                                             />
                                                         ))}
                                                     </div>
 
-                                                    {/* Bans */}
-                                                    <p className="mt-4 text-xs font-semibold text-gray-500">
-                                                        BAN
-                                                    </p>
+                                                    
 
-                                                    <div className="mt-2 flex flex-wrap gap-2">
-                                                        {awayBans.map((draft) => (
-                                                            <img
-                                                                key={draft.id}
-                                                                src={`http://localhost:8080/${draft.hero.logo}`}
-                                                                alt={draft.hero.name}
-                                                                title={draft.hero.name}
-                                                                className="h-10 w-10 rounded grayscale"
-                                                            />
-                                                        ))}
-                                                    </div>
+                                                    
                                                 </div>
+                                                {/* Bans */}
+                                                
                                             </div>
+                                            <button
+                                                    onClick={() =>
+                                                        setShowBans(prev => ({
+                                                            ...prev,
+                                                            [game.id]: !prev[game.id],
+                                                        }))
+                                                    }
+                                                    className="mt-3 text-sm font-medium text-gray-600 hover:text-gray-900"
+                                                >
+                                                    {showBans[game.id] ? "▲ Hide Bans" : "▼ Show Bans"}
+                                                </button>
 
-                                            {/* Winner */}
-                                            {/* <div className="mt-4 border-t pt-3 text-sm">
-                                                <span className="font-semibold">
-                                                    {game.winner_team_id === selectedMatch.home_team.id
-                                                        ? selectedMatch.home_team.short_name
-                                                        : selectedMatch.away_team.short_name}
-                                                </span>{" "}
-                                                Menang
-                                            </div> */}
+                                                {showBans[game.id] && (
+                                                    <div className="mt-3 border-t pt-3">
+                                                        <div className="mb-2 text-xs font-semibold text-gray-500">
+                                                            BAN
+                                                        </div>
+
+                                                        <div className="grid grid-cols-2 gap-6">
+
+                                                            {/* HOME BANS */}
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {homeBans.map((draft: any) => (
+                                                                    <img
+                                                                        key={draft.id}
+                                                                        src={`http://localhost:8080/${draft.hero.logo}`}
+                                                                        alt={draft.hero.name}
+                                                                        title={draft.hero.name}
+                                                                        className={`h-10 w-10 rounded grayscale ${
+                                                                            game.first_pick_team_id === selectedMatch.home_team.id
+                                                                                ? "ring-2 ring-blue-500"
+                                                                                : "ring-2 ring-red-500"
+                                                                        }`}
+                                                                    />
+                                                                ))}
+                                                            </div>
+
+                                                            {/* AWAY BANS */}
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {awayBans.map((draft: any) => (
+                                                                    <img
+                                                                        key={draft.id}
+                                                                        src={`http://localhost:8080/${draft.hero.logo}`}
+                                                                        alt={draft.hero.name}
+                                                                        title={draft.hero.name}
+                                                                        className={`h-10 w-10 rounded grayscale ${
+                                                                            game.first_pick_team_id === selectedMatch.away_team.id
+                                                                                ? "ring-2 ring-blue-500"
+                                                                                : "ring-2 ring-red-500"
+                                                                        }`}
+                                                                    />
+                                                                ))}
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                         </div>
                                     );
                                 })}

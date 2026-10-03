@@ -35,10 +35,11 @@ func NewGameService(
 }
 
 type CreateGameInput struct {
-	MatchID      uint
-	GameNumber   int
-	Duration     int
-	WinnerTeamID uint
+	MatchID         uint
+	GameNumber      int
+	Duration        int
+	WinnerTeamID    uint
+	FirstPickTeamID uint
 }
 
 func (s *GameService) FindByID(
@@ -120,6 +121,19 @@ func (s *GameService) CreateGame(
 			return err
 		}
 
+		_, err = s.TeamRepository.FindByID(
+			tx,
+			input.FirstPickTeamID,
+		)
+
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("first pick team not found")
+			}
+
+			return err
+		}
+
 		// =========================
 		// Calculate Required Wins
 		// =========================
@@ -165,10 +179,11 @@ func (s *GameService) CreateGame(
 		// =========================
 
 		game := &models.Game{
-			MatchID:      input.MatchID,
-			GameNumber:   input.GameNumber,
-			Duration:     input.Duration,
-			WinnerTeamID: input.WinnerTeamID,
+			MatchID:         input.MatchID,
+			GameNumber:      input.GameNumber,
+			Duration:        input.Duration,
+			WinnerTeamID:    input.WinnerTeamID,
+			FirstPickTeamID: input.FirstPickTeamID, // Assuming you have this field in the input
 		}
 
 		if err := s.GameRepository.Create(tx, game); err != nil {
@@ -271,4 +286,28 @@ func (s *GameService) CreateGame(
 	}
 
 	return game, nil
+}
+
+func (s *GameService) UpdateFirstPick(
+	gameID uint,
+	teamID uint,
+) error {
+
+	game, err := s.GameRepository.FindByID(gameID)
+	if err != nil {
+		return err
+	}
+
+	// Pastikan team adalah salah satu team yang bermain
+	if teamID != game.Match.HomeTeamID &&
+		teamID != game.Match.AwayTeamID {
+		return errors.New(
+			"first pick team must be one of the match teams",
+		)
+	}
+
+	return s.GameRepository.UpdateFirstPick(
+		gameID,
+		teamID,
+	)
 }

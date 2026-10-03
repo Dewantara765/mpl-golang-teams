@@ -74,13 +74,51 @@ func (gc *GameController) FindByID(c *gin.Context) {
 	})
 }
 
+func (gc *GameController) UpdateFirstPick(c *gin.Context) {
+	gameID, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid game id",
+		})
+		return
+	}
+
+	var input struct {
+		TeamID uint `json:"team_id" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	err = gc.GameService.UpdateFirstPick(
+		uint(gameID),
+		input.TeamID,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "first pick updated successfully",
+	})
+}
+
 func (gc *GameController) CreateGame(c *gin.Context) {
 
 	var input struct {
-		MatchID      uint `json:"match_id"`
-		GameNumber   int  `json:"game_number"`
-		Duration     int  `json:"duration"`
-		WinnerTeamID uint `json:"winner_team_id"`
+		MatchID         uint `json:"match_id"`
+		GameNumber      int  `json:"game_number"`
+		Duration        int  `json:"duration"`
+		WinnerTeamID    uint `json:"winner_team_id"`
+		FirstPickTeamID uint `json:"first_pick_team_id"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -123,16 +161,24 @@ func (gc *GameController) CreateGame(c *gin.Context) {
 		return
 	}
 
+	if input.FirstPickTeamID == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "First pick team is required",
+		})
+		return
+	}
+
 	// =========================
 	// Service
 	// =========================
 
 	game, err := gc.GameService.CreateGame(
 		services.CreateGameInput{
-			MatchID:      input.MatchID,
-			GameNumber:   input.GameNumber,
-			Duration:     input.Duration,
-			WinnerTeamID: input.WinnerTeamID,
+			MatchID:         input.MatchID,
+			GameNumber:      input.GameNumber,
+			Duration:        input.Duration,
+			WinnerTeamID:    input.WinnerTeamID,
+			FirstPickTeamID: input.FirstPickTeamID,
 		},
 	)
 

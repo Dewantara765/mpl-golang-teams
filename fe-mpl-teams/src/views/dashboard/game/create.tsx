@@ -6,6 +6,7 @@ export default function GameCreate(){
     const {id} = useParams();
     const [game_number, setGameNumber] = useState<number>(0);
     const [winner_team_id, setWinnerTeamId] = useState<number>(0);
+    const [first_pick_team_id, setFirstPickTeamId] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
     const [match, setMatch] = useState<Match | null>(null);
     const [minutes, setMinutes] = useState<number>(0);
@@ -44,7 +45,7 @@ export default function GameCreate(){
 
     const handleSubmit = async(event : React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        const data = {match_id : Number(id), game_number, duration, winner_team_id}
+        const data = {match_id : Number(id), game_number, duration, winner_team_id, first_pick_team_id}
         try {
             await api.post("/games", data);
             navigate(`/dashboard/match/${id}`)
@@ -73,6 +74,15 @@ export default function GameCreate(){
                     <select name="winner_team" id="winner_team" value={winner_team_id} className="w-80 select-field"
                     onChange={(e) => setWinnerTeamId(Number(e.target.value))}>
                         <option value="">Pilih Tim Pemenang..</option>
+                        <option value={match?.home_team.id}>{match?.home_team.short_name}</option>
+                        <option value={match?.away_team.id}>{match?.away_team.short_name}</option>
+                    </select>
+                </div>
+                <div className="input-container">
+                    <label htmlFor="first_pick_team" className="input-label">Tim Pertama Memilih</label>
+                    <select name="first_pick_team" id="first_pick_team" value={first_pick_team_id} className="w-80 select-field"
+                    onChange={(e) => setFirstPickTeamId(Number(e.target.value))}>
+                        <option value="">Pilih Tim Pertama Memilih..</option>
                         <option value={match?.home_team.id}>{match?.home_team.short_name}</option>
                         <option value={match?.away_team.id}>{match?.away_team.short_name}</option>
                     </select>

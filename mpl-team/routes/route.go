@@ -80,6 +80,7 @@ func SetupRoutes(
 		game.GET("", controllers.FindGames)
 		game.POST("", gameController.CreateGame)
 		game.GET("/:id", gameController.FindByID)
+		game.PUT("/:id/first-pick", gameController.UpdateFirstPick)
 	}
 
 	standing := router.Group("/standings")

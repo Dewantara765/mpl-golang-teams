@@ -61,6 +61,7 @@ func (r *MatchRepository) FindByID(id uint) (*models.Match, error) {
 		Preload("Event.Phase.Tournament").
 		Preload("Games").
 		Preload("Games.WinnerTeam").
+		Preload("Games.FirstPickTeam").
 		First(&match, id).Error
 
 	if err != nil {

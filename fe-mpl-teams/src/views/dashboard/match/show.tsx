@@ -53,6 +53,8 @@ export default function DashboardMatchShow(){
         winner_team: Team,
         winner_team_id: number,
         duration: number,
+        first_pick_team: Team,
+        first_pick_team_id: number,
     }
 
     interface Match {
@@ -169,6 +171,7 @@ export default function DashboardMatchShow(){
                         <th className="table-cell">Game</th>
                         <th className="table-cell">Durasi</th>
                         <th className="table-cell">Pemenang</th>
+                        <th className="table-cell">First Pick</th>
                         <th className="table-cell">Aksi</th>
                     </tr>
                 </thead>
@@ -177,20 +180,28 @@ export default function DashboardMatchShow(){
                         <tr key={game.id}>
                             <td className="table-cell">Game {game.game_number}</td>
                             <td className="table-cell">{convertDuration(game.duration)}</td>
+                                <td className="table-cell">
+                                    {game.winner_team.short_name}</td>
+                                <td className="table-cell">
+                                    {game.first_pick_team.short_name}
+                                </td>
                             <td className="table-cell">
-                                {game.winner_team.short_name}</td>
-                            <td className="table-cell">
-                                <Link to={`/dashboard/match/${id}/game/${game.id}/create`} className="button">
-                                    Add Draft
-                                </Link>
-                                <button className="show-button"
-                                onClick={() => {
-                                    setSelectedGame(game)
-                                    fetchHeroDrafts(game.id)
-                                    setShowDraft(true);
-                                    }}>
-                                    Show Draft
-                                </button>
+                                <div className="flex gap-2">
+                                    <Link to={`/dashboard/match/${id}/game/${game.id}/create`} className="button">
+                                        Add Draft
+                                    </Link>
+                                    <button className="show-button"
+                                    onClick={() => {
+                                        setSelectedGame(game)
+                                        fetchHeroDrafts(game.id)
+                                        setShowDraft(true);
+                                        }}>
+                                        Show Draft
+                                    </button>
+                                    <Link to={`/dashboard/match/${id}/game/${game.id}/update_fp`} className="edit-button">
+                                        Update First Pick
+                                    </Link>
+                                </div>
                             </td>
                         </tr>
                     )

@@ -58,10 +58,23 @@ func (r *GameRepository) FindByMatchAndGameNumber(
 func (r *GameRepository) FindByID(id uint) (*models.Game, error) {
 	var game models.Game
 
-	err := r.DB.First(&game, id).Error
+	err := r.DB.
+		Preload("Match").
+		First(&game, id).Error
 	if err != nil {
 		return nil, err
 	}
 
 	return &game, nil
+}
+
+func (r *GameRepository) UpdateFirstPick(
+	gameID uint,
+	teamID uint,
+) error {
+	return r.DB.
+		Model(&models.Game{}).
+		Where("id = ?", gameID).
+		Update("first_pick_team_id", teamID).
+		Error
 }
