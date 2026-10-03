@@ -41,6 +41,12 @@ type CreateGameInput struct {
 	WinnerTeamID uint
 }
 
+func (s *GameService) FindByID(
+	id uint,
+) (*models.Game, error) {
+	return s.GameRepository.FindByID(id)
+}
+
 func (s *GameService) CreateGame(
 	input CreateGameInput,
 ) (*models.Game, error) {

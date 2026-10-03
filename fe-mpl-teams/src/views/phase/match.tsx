@@ -49,6 +49,7 @@ export default function PhaseMatches(){
         game_number: number,
         match: Match,
         winner_team: Team,
+        winner_team_id: number,
         duration: number,
         hero_draft: HeroDraft[],
     }
@@ -162,25 +163,25 @@ export default function PhaseMatches(){
                             {/* Games */}
                             <div className="mt-4 space-y-3">
                                 {selectedMatch.games.map((game) => {
-                                    const homePicks = game.hero_draft?.filter(
+                                    const homePicks = game.hero_drafts?.filter(
                                         (draft) =>
                                             draft.team_id === selectedMatch.home_team.id &&
                                             draft.type === "pick"
                                     );
 
-                                    const awayPicks = game.hero_draft?.filter(
+                                    const awayPicks = game.hero_drafts?.filter(
                                         (draft) =>
                                             draft.team_id === selectedMatch.away_team.id &&
                                             draft.type === "pick"
                                     );
 
-                                    const homeBans = game.hero_draft?.filter(
+                                    const homeBans = game.hero_drafts?.filter(
                                         (draft) =>
                                             draft.team_id === selectedMatch.home_team.id &&
                                             draft.type === "ban"
                                     );
 
-                                    const awayBans = game.hero_draft?.filter(
+                                    const awayBans = game.hero_drafts?.filter(
                                         (draft) =>
                                             draft.team_id === selectedMatch.away_team.id &&
                                             draft.type === "ban"
@@ -207,10 +208,12 @@ export default function PhaseMatches(){
 
                                                 {/* HOME */}
                                                 <div>
-                                                    <h3 className="font-semibold">
-                                                        {selectedMatch.home_team.short_name}
-                                                    </h3>
-
+                                                    <div className="flex items-center gap-2">
+                                                        <h3 className="font-semibold">{selectedMatch.home_team.short_name}</h3> 
+                                                        {game.winner_team_id === selectedMatch.home_team.id ? 
+                                                            <div className="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white">Menang</div> : 
+                                                            <div className="rounded bg-red-500 px-2 py-1 text-xs font-semibold text-white">Kalah</div>}
+                                                    </div>
                                                     {/* Picks */}
                                                     <p className="mt-3 text-xs font-semibold text-gray-500">
                                                         PICK
@@ -248,10 +251,15 @@ export default function PhaseMatches(){
 
                                                 {/* AWAY */}
                                                 <div>
-                                                    <h3 className="font-semibold">
-                                                        {selectedMatch.away_team.short_name}
-                                                    </h3>
-
+                                                    <div className="flex items-center gap-2">
+                                                        <h3 className="font-semibold">
+                                                            {selectedMatch.away_team.short_name}
+                                                            
+                                                        </h3>
+                                                        {game.winner_team_id === selectedMatch.away_team.id ? 
+                                                                <div className="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white">Menang</div> : 
+                                                                <div className="rounded bg-red-500 px-2 py-1 text-xs font-semibold text-white">Kalah</div>}
+                                                    </div>
                                                     {/* Picks */}
                                                     <p className="mt-3 text-xs font-semibold text-gray-500">
                                                         PICK
@@ -289,14 +297,14 @@ export default function PhaseMatches(){
                                             </div>
 
                                             {/* Winner */}
-                                            <div className="mt-4 border-t pt-3 text-sm">
+                                            {/* <div className="mt-4 border-t pt-3 text-sm">
                                                 <span className="font-semibold">
                                                     {game.winner_team_id === selectedMatch.home_team.id
                                                         ? selectedMatch.home_team.short_name
                                                         : selectedMatch.away_team.short_name}
                                                 </span>{" "}
                                                 Menang
-                                            </div>
+                                            </div> */}
                                         </div>
                                     );
                                 })}

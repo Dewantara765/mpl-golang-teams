@@ -52,6 +52,28 @@ func FindGames(c *gin.Context) {
 
 }
 
+func (gc *GameController) FindByID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid game ID",
+		})
+		return
+	}
+
+	game, err := gc.GameService.FindByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": game,
+	})
+}
+
 func (gc *GameController) CreateGame(c *gin.Context) {
 
 	var input struct {

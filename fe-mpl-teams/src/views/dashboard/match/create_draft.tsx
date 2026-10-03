@@ -5,14 +5,23 @@ export default function CreateDraft() {
     const {id} = useParams();
     const navigate = useNavigate();
     const {game_id} = useParams();
-    const [teams, setTeams] = useState<Team[]>([]);
+    const [match, setMatch] = useState<Match | null>(null);
+    const [game, setGame] = useState<Game | null>(null);
     const [heroes, setHeroes] = useState<Hero[]>([]);
     const [team_id, setTeamId] = useState<number>(0);
     const [selectedHeroes, setSelectedHeroes] = useState<number[]>([]);
     const [type, setType] = useState<string>("");
-    interface Team {
+
+    interface Match {
         id: number,
-        name: string,
+        home_team : {
+            id: number,
+            short_name: string,
+        }
+        away_team : {
+            id: number,
+            short_name: string,
+        }
     }
 
     interface Hero {
@@ -21,11 +30,18 @@ export default function CreateDraft() {
         logo: string,
     }
 
+    interface Game {
+        id: number,
+        game_number: number,
+        duration: number,
+        winner_team_id: number,
+    }
+
     useEffect(() => {
-        const fetchTeams = async () => {
+        const fetchMatch = async () => {
             try {
-                const response = await api.get("/teams");
-                setTeams(response.data.data);
+                const response = await api.get(`/matches/${id}`);
+                setMatch(response.data.data);
             } catch (error) {
                 console.error("Error fetching teams:", error);
             }
@@ -40,8 +56,19 @@ export default function CreateDraft() {
             }
         };
 
-        fetchTeams();
+        const fetchGame = async () => {
+            try {
+                const response = await api.get(`/games/${game_id}`);
+                setGame(response.data.data);
+            } catch (error) {
+                console.error("Error fetching game:", error);
+            }
+
+        };
+
+        fetchMatch();
         fetchHeroes();
+        fetchGame();
     }, [id, game_id]);
 
     const selectHero = (heroId: number) => {
@@ -79,16 +106,16 @@ export default function CreateDraft() {
     return (
         <div className="p-4">
             <title>Create Draft</title>
-            <div className="header-title">Create Draft for Game ID {game_id} in Match ID {id}</div>
+            <div className="header-title">Create Draft for Game {game?.game_number} in Match ID {id}</div>
             <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
                 <div className="flex gap-2 items-center">
                     <label htmlFor="team" className="input-label">Team</label>
                     <select name="team" id="team" value={team_id} className="w-40 select-field"
                     onChange={(e) => setTeamId(Number(e.target.value))}>
                         <option value="">Pilih Team..</option>
-                    {teams.map((team) => (
-                        <option key={team.id} value={team.id}>{team.name}</option>
-                    ))}
+                        <option value={match?.home_team.id}>{match?.home_team.short_name}</option>
+                        <option value={match?.away_team.id}>{match?.away_team.short_name}</option>
+                
 
                 
 

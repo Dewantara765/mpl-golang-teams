@@ -8,5 +8,5 @@ type Game struct {
 	Duration     int         `json:"duration" gorm:"not null"`
 	WinnerTeam   Team        `json:"winner_team" gorm:"foreignKey:WinnerTeamID"`
 	WinnerTeamID uint        `json:"winner_team_id" gorm:"not null"`
-	HeroDrafts   []HeroDraft `json:"hero_draft" gorm:"foreignKey:GameID"`
+	HeroDrafts   []HeroDraft `json:"hero_drafts" gorm:"foreignKey:GameID"`
 }

@@ -79,6 +79,7 @@ func SetupRoutes(
 	{
 		game.GET("", controllers.FindGames)
 		game.POST("", gameController.CreateGame)
+		game.GET("/:id", gameController.FindByID)
 	}
 
 	standing := router.Group("/standings")

@@ -54,3 +54,14 @@ func (r *GameRepository) FindByMatchAndGameNumber(
 
 	return &game, nil
 }
+
+func (r *GameRepository) FindByID(id uint) (*models.Game, error) {
+	var game models.Game
+
+	err := r.DB.First(&game, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &game, nil
+}
