@@ -37,7 +37,7 @@ a.active {
 }
 
 .sub-header-title {
-  @apply font-semibold text-xl mt-3;
+  @apply font-semibold text-lg mt-3;
 }
 
 .table-cell {

@@ -70,6 +70,9 @@ func FindTournamentBySlug(c *gin.Context) {
 			`)
 		}).
 		Preload("Phases.Standings.Team").
+		Preload("Phases.Events.Matches", func(db *gorm.DB) *gorm.DB {
+			return db.Where("status = ?", "completed")
+		}).
 		First(&tournament, "slug = ?", slug).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Tournament not found"})
 		return
