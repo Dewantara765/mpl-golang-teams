@@ -18,6 +18,7 @@ export default function MatchIndex() {
         }
         id : number,
         team : {
+            short_name: string;
             id: number,
             name: string,
             logo: string,
@@ -75,13 +76,18 @@ export default function MatchIndex() {
     const teams = phase?.standings.map(
         (standing) => standing.team
     ) ?? [];
+    
 
     const matches = phase?.events.flatMap(
-        (event) => event.matches
+        (event: { matches }) => event.matches
     ) ?? [];
 
     const matchMap = new Map(
-        matches.map((match) => [
+        matches.map((match: { 
+            home_team_id: number; 
+            away_team_id: number; 
+            home_score: number;
+            away_score: number; }) => [
             `${match.home_team_id}-${match.away_team_id}`,
             match,
         ])
@@ -92,10 +98,9 @@ const getMatch = (
         awayTeamId: number
     ) => {
         return matchMap.get(
-            `${homeTeamId}-${awayTeamId}`
+            `${homeTeamId}-${awayTeamId}` 
         );
     };
-
 
 
     return (
@@ -159,13 +164,14 @@ const getMatch = (
                         </tbody>
                         </table>
                         <div>
+                       
                         <div className='sub-header-title'>Tabel Head-to-head</div>
                         <table>
                             <thead>
                                 <tr>
                                     <th>H/A</th>
                                     {teams.map((team) => (
-                                        <th className="border border-gray-300 px-1 py-2" key={team.id}>
+                                        <th className="border border-gray-300 py-2 w-20" key={team.id}>
                                             {team.short_name}
                                         </th>
                                     ))}
@@ -174,7 +180,7 @@ const getMatch = (
                             <tbody>
                             {teams.map((homeTeam) => (
                                 <tr key={homeTeam.id}>
-                                    <th className="border border-gray-300 px-1 py-2">
+                                    <th className="border border-gray-300 w-15 py-2">
                                         {homeTeam.short_name}
                                     </th>
 
@@ -190,32 +196,54 @@ const getMatch = (
                                         );
                                     }
 
-                                    const match = getMatch(
+                                    const match1 = getMatch(
                                         homeTeam.id,
                                         awayTeam.id
                                     );
 
+                                    const match2 = getMatch(
+                                        awayTeam.id,
+                                        homeTeam.id
+                                    );
+
+                                    let aggHome = 0;
+                                    let aggAway = 0;
+
+                                    if (!match1) {
+                                        aggHome = match2.away_score;
+                                        aggAway = match2.home_score
+                                    } else if(!match2) {
+                                        aggHome = match1.home_score;
+                                        aggAway = match2.away_score;
+                                    }else {
+                                        aggHome = match1.home_score + match2.away_score;
+                                        aggAway = match1.away_score + match2.home_score;
+                                    }
+
                                     let bgColor = "";
 
-                                    if (match) {
+                                    if (match1 || match2) {
                                         if (
-                                            match.home_score >
-                                            match.away_score
+                                            aggHome >
+                                            aggAway
                                         ) {
                                             bgColor = "bg-green-200";
                                         } else if (
-                                            match.home_score <
-                                            match.away_score
+                                            aggHome <
+                                            aggAway
                                         ) {
                                             bgColor = "bg-red-200";
                                         } else {
-                                            bgColor = "bg-gray-200";
+                                            bgColor = "bg-yellow-200";
                                         }
                                     }
                                         return (
-                                        <td className={`border border-gray-300 px-1 py-2 ${bgColor}`} key={awayTeam.id}>
-                                            {match
-                                                ? `${match.home_score}-${match.away_score}`
+                                        <td className={`border border-gray-300 px-1 py-2 ${bgColor} text-center`} key={awayTeam.id}>
+                                            {match1 || match2
+                                                ? <div>
+                                                    <div>{aggHome}-{aggAway}</div>
+                                                    <div className='text-xs'>{match1.home_score}-{match1.away_score}, {match2.away_score}-{match2.home_score}</div>
+                                                </div>
                                                 : "-"}
                                         </td>
                                     )})}
@@ -223,6 +251,7 @@ const getMatch = (
                             ))}
                         </tbody>
                     </table>
+                    {/* {aggregate(7, 9)} */}
                         </div>
                     </div>
                 )
