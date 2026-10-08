@@ -122,7 +122,9 @@ export default function MatchIndex() {
 
                     </tbody>
                     </table>
-                )}
+                )
+                
+                }
                     </div>
                 )
 

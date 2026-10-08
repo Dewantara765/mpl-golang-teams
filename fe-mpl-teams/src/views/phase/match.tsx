@@ -52,7 +52,8 @@ export default function PhaseMatches(){
         winner_team: Team,
         winner_team_id: number,
         duration: number,
-        hero_draft: HeroDraft[],
+        first_pick_team_id: number,
+        hero_drafts: HeroDraft[],
     }
 
     interface HeroDraft {
@@ -80,7 +81,7 @@ export default function PhaseMatches(){
                 const response = await api.get(
                     `/tournaments/${slug}/phases/${phaseSlug}`
                 );
-
+                
                 setPhase(response.data);
             } catch (error) {
                 console.error(error);
@@ -90,6 +91,14 @@ export default function PhaseMatches(){
         };
         fetchMatches()
     },[slug, phaseSlug])
+
+    // useEffect(() => {
+    //     if (phase) {
+    //         document.title = `${phase.tournament.name} ${phase.name} Matches`;
+    //     } else {
+    //         document.title = "Phase matches";
+    //     }
+    // }, [phase]);
 
     if (loading) {
         return <div>Loading...</div>;
@@ -107,17 +116,18 @@ export default function PhaseMatches(){
 
                         {event.matches.map((match) => (
                             <tr key={match.id} onClick={() => setSelectedMatch(match)}>
-                                <td className="table-cell">
+                                <td className={`table-cell ${match.home_score > match.away_score ? "font-bold bg-green-200" : ""}`}>
                                     <div className="flex gap-2">
                                         <img src={`http://localhost:8080/${match.home_team.logo}`} alt={match.home_team.name}
                                         className="w-7 object-contain"/>
-                                        {match.home_team.name}
+                                        <div>{match.home_team.short_name}</div>
                                     </div></td>
-                                <td className="table-cell">{match.home_score}-{match.away_score}</td> 
-                                <td className="table-cell">
+                                <td className={`table-cell ${match.home_score > match.away_score ? "font-bold" : ""}`}>{match.home_score}</td>
+                                <td className={`table-cell ${match.home_score < match.away_score ? "font-bold" : ""}`}>{match.away_score}</td> 
+                                <td className={`table-cell ${match.home_score < match.away_score ? "font-bold bg-green-200" : ""}`}>
                                     <div className="flex gap-2">
-                                        {match.away_team.name}
-                                        <img src={`http://localhost:8080/${match.away_team.logo}`} alt={match.away_team.name}
+                                        <div>{match.away_team.short_name}</div>
+                                        <img src={`http://localhost:8080/${match.away_team.logo}`} alt={match.away_team.short_name}
                                         className="w-7 object-contain"/>
                                     </div>
                                     
@@ -141,7 +151,7 @@ export default function PhaseMatches(){
                             <div className="flex items-center justify-between border-b pb-4">
                                 <div>
                                     <h2 className="text-xl font-bold">
-                                        {selectedMatch.home_team.short_name} {selectedMatch.home_score} - {selectedMatch.away_score} {selectedMatch.away_team.short_name}
+                                        {selectedMatch.home_team.name} {selectedMatch.home_score} - {selectedMatch.away_score} {selectedMatch.away_team.name}
                                     </h2>
 
                                     <p className="text-sm text-gray-500">
@@ -199,9 +209,9 @@ export default function PhaseMatches(){
                                                     Game {game.game_number}
                                                 </span>
 
-                                                <span className="text-sm text-gray-500">
-                                                    {convertDuration(game.duration)}
-                                                </span>
+                                                <span className="text-sm text-gray-500">{convertDuration(game.duration)}</span>
+
+                                                
                                             </div>
 
                                             {/* Teams */}
@@ -213,12 +223,12 @@ export default function PhaseMatches(){
                                                         <h3 className="font-semibold">{selectedMatch.home_team.short_name}</h3> 
                                                         {game.winner_team_id === selectedMatch.home_team.id ? 
                                                             <div className="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white">Menang</div> : 
-                                                            <div className="rounded bg-red-500 px-2 py-1 text-xs font-semibold text-white">Kalah</div>}
+                                                            <div className="rounded bg-gray-500 px-2 py-1 text-xs font-semibold text-white">Kalah</div>}
                                                     </div>
                                                     {/* Picks */}
-                                                    <p className="mt-3 text-xs font-semibold text-gray-500">
+                                                    {/* <p className="mt-3 text-xs font-semibold text-gray-500">
                                                         PICK
-                                                    </p>
+                                                    </p> */}
 
                                                     <div className="mt-2 flex flex-wrap gap-2">
                                                         {homePicks.map((draft : any) => (
@@ -227,7 +237,7 @@ export default function PhaseMatches(){
                                                                 src={`http://localhost:8080/${draft.hero.logo}`}
                                                                 alt={draft.hero.name}
                                                                 title={draft.hero.name}
-                                                                className={`h-10 w-10 rounded ${game?.first_pick_team_id === selectedMatch.home_team.id ? 'ring-3 ring-blue-500' : 'ring-3 ring-red-500'}`}
+                                                                className={`h-9 w-9 rounded ${game?.first_pick_team_id === selectedMatch.home_team.id ? 'ring-2 ring-blue-500' : 'ring-2 ring-red-500'}`}
                                                             />
                                                         ))}
                                                     </div>
@@ -238,6 +248,8 @@ export default function PhaseMatches(){
                                                     
                                                 </div>
 
+                                                
+
                                                 {/* AWAY */}
                                                 <div>
                                                     <div className="flex items-center gap-2">
@@ -247,12 +259,12 @@ export default function PhaseMatches(){
                                                         </h3>
                                                         {game.winner_team_id === selectedMatch.away_team.id ? 
                                                                 <div className="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white">Menang</div> : 
-                                                                <div className="rounded bg-red-500 px-2 py-1 text-xs font-semibold text-white">Kalah</div>}
+                                                                <div className="rounded bg-gray-500 px-2 py-1 text-xs font-semibold text-white">Kalah</div>}
                                                     </div>
                                                     {/* Picks */}
-                                                    <p className="mt-3 text-xs font-semibold text-gray-500">
+                                                    {/* <p className="mt-3 text-xs font-semibold text-gray-500">
                                                         PICK
-                                                    </p>
+                                                    </p> */}
 
                                                     <div className="mt-2 flex flex-wrap gap-2">
                                                         {awayPicks.map((draft : any) => (
@@ -261,7 +273,7 @@ export default function PhaseMatches(){
                                                                 src={`http://localhost:8080/${draft.hero.logo}`}
                                                                 alt={draft.hero.name}
                                                                 title={draft.hero.name}
-                                                                className={`h-10 w-10 rounded ${game?.first_pick_team_id === selectedMatch.away_team.id ? 'ring-3 ring-blue-500' : 'ring-3 ring-red-500'}`}
+                                                                className={`h-9 w-9 rounded ${game?.first_pick_team_id === selectedMatch.away_team.id ? 'ring-2 ring-blue-500' : 'ring-2 ring-red-500'}`}
                                                             />
                                                         ))}
                                                     </div>
@@ -287,9 +299,9 @@ export default function PhaseMatches(){
 
                                                 {showBans[game.id] && (
                                                     <div className="mt-3 border-t pt-3">
-                                                        <div className="mb-2 text-xs font-semibold text-gray-500">
+                                                        {/* <div className="mb-2 text-xs font-semibold text-gray-500">
                                                             BAN
-                                                        </div>
+                                                        </div> */}
 
                                                         <div className="grid grid-cols-2 gap-6">
 
@@ -301,7 +313,7 @@ export default function PhaseMatches(){
                                                                         src={`http://localhost:8080/${draft.hero.logo}`}
                                                                         alt={draft.hero.name}
                                                                         title={draft.hero.name}
-                                                                        className={`h-10 w-10 rounded grayscale ${
+                                                                        className={`h-9 w-9 rounded grayscale ${
                                                                             game.first_pick_team_id === selectedMatch.home_team.id
                                                                                 ? "ring-2 ring-blue-500"
                                                                                 : "ring-2 ring-red-500"
@@ -318,7 +330,7 @@ export default function PhaseMatches(){
                                                                         src={`http://localhost:8080/${draft.hero.logo}`}
                                                                         alt={draft.hero.name}
                                                                         title={draft.hero.name}
-                                                                        className={`h-10 w-10 rounded grayscale ${
+                                                                        className={`h-9 w-9 rounded grayscale ${
                                                                             game.first_pick_team_id === selectedMatch.away_team.id
                                                                                 ? "ring-2 ring-blue-500"
                                                                                 : "ring-2 ring-red-500"

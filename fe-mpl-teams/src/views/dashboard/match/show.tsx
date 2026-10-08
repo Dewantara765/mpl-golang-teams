@@ -6,18 +6,10 @@ import { formatTime } from "../../../../utils/formatTime"
 import { convertDuration } from "../../../../utils/duration"
 export default function DashboardMatchShow(){
     const {id} = useParams()
-    const [home_team_name, setHomeTeamName] = useState<string>("")
-    const [home_score, setHomeScore] = useState<number>(0);
-    const [away_score, setAwayScore] = useState<number>(0);
-    const [best_of, setBestOf] = useState<number>(0);
-    const [away_team_name, setAwayTeamName] = useState<string>("")
-    const [home_team_logo, setHomeTeamLogo] = useState<string>("")
-    const [away_team_logo, setAwayTeamLogo] = useState<string>("")
+    const [match, setMatch] = useState<Match | null>(null);
     const [date, setDate] = useState<string>("");
     const [time, setTime] = useState<string>("");
-    const [event_name, setEventName] = useState<string>("");
-    const [phase_name, setPhaseName] = useState<string>("");
-    const [tournament_name, setTournamentName] = useState<string>("");
+
     const [games, setGames] = useState<Game[]>([]);
     const [selectedGame, setSelectedGame] = useState<Game | null>(null);
     const [showDraft, setShowDraft] = useState<boolean>(false);
@@ -65,7 +57,20 @@ export default function DashboardMatchShow(){
         away_score : number,
         date: string,
         time: string,
+        best_of: number,
         Games: Game[],
+        event: {
+            id: number,
+            name: string,
+            phase: {
+                id: number,
+                name: string,
+                tournament: {
+                    id: number,
+                    name: string
+                }
+            }
+        }
 
     }
 
@@ -80,20 +85,11 @@ export default function DashboardMatchShow(){
         const fetchMatch = async() => {
             try {
                 const response = await api.get(`matches/${id}`)
-                const match = response.data.data;
-                setHomeTeamName(match.home_team.name)
-                setAwayTeamName(match.away_team.name)
-                setHomeScore(match.home_score)
-                setAwayScore(match.away_score)
-                setBestOf(match.best_of)
-                setHomeTeamLogo(`http://localhost:8080/${match.home_team.logo}`)
-                setAwayTeamLogo(`http://localhost:8080/${match.away_team.logo}`)
-                setDate(formatDate(match.date))
-                setTime(formatTime(match.time))
-                setEventName(match.event.name)
-                setPhaseName(match.event.phase.name)
-                setTournamentName(match.event.phase.tournament.name)
-                setGames(match.games)
+                const matchData = response.data.data;
+                setMatch(matchData)
+                setDate(formatDate(matchData.date))
+                setTime(formatTime(matchData.time))
+                setGames(matchData.games)
                 
                 
             }catch (error : any) {
@@ -117,18 +113,19 @@ export default function DashboardMatchShow(){
         <div className="p-4">
             <title>Dashboard - Match details </title>
             <p className="header-title">Match details</p>
+            {match ?
             <table className="table-container">
                 <tbody>
                     <tr>
                         <th className="table-cell">Hasil pertandingan</th>
                         <td className="table-cell">
                             <div className="flex gap-2">
-                                <img src={home_team_logo} alt={home_team_name} className="w-10 object-contain"/>
-                                <div>{home_team_name} <b>{home_score}</b>-<b>{away_score}</b> {away_team_name} </div>
-                                <img src={away_team_logo} alt={away_team_name} className="w-10 object-contain"/>
+                                <img src={`http://localhost:8080/${match?.home_team.logo}`} alt={match?.home_team.name} className="w-10 object-contain"/>
+                                <div>{match?.home_team.name} <b>{match?.home_score}</b>-<b>{match?.away_score}</b> {match?.away_team.name} </div>
+                                <img src={`http://localhost:8080/${match?.away_team.logo}`} alt={match?.away_team.name} className="w-10 object-contain"/>
                             </div>
                             <div className="text-center">
-                                (BO{best_of})
+                                (BO{match?.best_of})
                             </div>
                             
                         </td>
@@ -143,28 +140,30 @@ export default function DashboardMatchShow(){
                     <tr>
                         <th className="table-cell">Event</th>
                         <td className="table-cell">
-                            {event_name}
+                            {match?.event.name}
                             
                         </td>
                     </tr>
                     <tr>
                         <th className="table-cell">Phase</th>
                         <td className="table-cell">
-                            {phase_name}
+                            {match?.event.phase.name}
                             
                         </td>
                     </tr>
                     <tr>
                         <th className="table-cell">Tournament</th>
                         <td className="table-cell">
-                            {tournament_name}
+                            {match?.event.phase.tournament.name}
                             
                         </td>
                     </tr>
                 </tbody>
 
             </table>
+            : <div>Tidak ada data..</div>}
             <div className="sub-header-title">Daftar game :</div>
+            {games ? (
             <table className="table-container">
                 <thead>
                     <tr>
@@ -198,9 +197,9 @@ export default function DashboardMatchShow(){
                                         }}>
                                         Show Draft
                                     </button>
-                                    <Link to={`/dashboard/match/${id}/game/${game.id}/update_fp`} className="edit-button">
+                                    {/* <Link to={`/dashboard/match/${id}/game/${game.id}/update_fp`} className="edit-button">
                                         Update First Pick
-                                    </Link>
+                                    </Link> */}
                                 </div>
                             </td>
                         </tr>
@@ -210,10 +209,10 @@ export default function DashboardMatchShow(){
 
                 </tbody>
             </table> 
-            
+            ): <div>Tidak ada data game..</div>}
             <Link to={`/dashboard/match/${id}/create`} className="button">Buat game</Link>
             {showDraft && selectedGame && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center" onClick={() => setShowDraft(false)}>
                 <div className="bg-white p-6 rounded-lg w-[700px]">
 
                     <h2 className="text-xl font-bold mb-6">
@@ -278,6 +277,7 @@ export default function DashboardMatchShow(){
                 </div>
             </div>
         )}
+        
             
         </div>
     )

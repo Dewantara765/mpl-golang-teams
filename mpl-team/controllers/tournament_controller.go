@@ -35,6 +35,7 @@ func FindPhaseWithMatches(c *gin.Context) {
 		Joins("JOIN tournaments ON tournaments.id = phases.tournament_id").
 		Where("tournaments.slug = ?", tournamentSlug).
 		Where("phases.slug = ?", phaseSlug).
+		Preload("Tournament").
 		Preload("Events").
 		Preload("Events.Matches").
 		Preload("Events.Matches.HomeTeam").
