@@ -11,6 +11,7 @@ export default function CreateDraft() {
     const [team_id, setTeamId] = useState<number>(0);
     const [selectedHeroes, setSelectedHeroes] = useState<number[]>([]);
     const [type, setType] = useState<string>("");
+    const [error, setError] = useState<string>("");
 
     interface Match {
         id: number,
@@ -100,6 +101,7 @@ export default function CreateDraft() {
             navigate(`/dashboard/match/${id}`);
         } catch (error) {
             console.error("Error creating draft:", error);
+            setError(error)
         }
     }
 

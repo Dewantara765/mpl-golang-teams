@@ -74,6 +74,7 @@ export default function PhaseMatches(){
 
     useEffect(() => {
         if (!slug || !phaseSlug) return;
+        document.title = "Phase Matches";
         const fetchMatches = async () => {
             try {
                 setLoading(true);
@@ -87,25 +88,20 @@ export default function PhaseMatches(){
                 console.error(error);
             } finally {
                 setLoading(false);
+                
             }
         };
         fetchMatches()
     },[slug, phaseSlug])
 
-    // useEffect(() => {
-    //     if (phase) {
-    //         document.title = `${phase.tournament.name} ${phase.name} Matches`;
-    //     } else {
-    //         document.title = "Phase matches";
-    //     }
-    // }, [phase]);
+    
 
     if (loading) {
         return <div>Loading...</div>;
     }
     return (
         <div className="p-4">
-            <title>Phase matches</title>
+            
             <div className="header-title">List Match</div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {phase.events.map((event) => (
@@ -180,11 +176,15 @@ export default function PhaseMatches(){
                                             draft.type === "pick"
                                     );
 
+                                    const sortedHomePicks = homePicks.sort((a,b) => a.id - b.id);
+
                                     const awayPicks = game.hero_drafts?.filter(
                                         (draft : any) =>
                                             draft.team_id === selectedMatch.away_team.id &&
                                             draft.type === "pick"
                                     );
+
+                                    const sortedAwayPicks = awayPicks.sort((a,b) => a.id - b.id);
 
                                     const homeBans = game.hero_drafts?.filter(
                                         (draft : any) =>
@@ -192,11 +192,15 @@ export default function PhaseMatches(){
                                             draft.type === "ban"
                                     );
 
+                                    const sortedHomeBans = homeBans.sort((a,b) => a.id - b.id);
+
                                     const awayBans = game.hero_drafts?.filter(
                                         (draft) =>
                                             draft.team_id === selectedMatch.away_team.id &&
                                             draft.type === "ban"
                                     );
+
+                                    const sortedAwayBans = awayBans.sort((a,b) => a.id - b.id);
 
                                     return (
                                         <div
@@ -231,7 +235,7 @@ export default function PhaseMatches(){
                                                     </p> */}
 
                                                     <div className="mt-2 flex flex-wrap gap-2">
-                                                        {homePicks.map((draft : any) => (
+                                                        {sortedHomePicks.map((draft : any) => (
                                                             <img
                                                                 key={draft.id}
                                                                 src={`http://localhost:8080/${draft.hero.logo}`}
@@ -267,7 +271,7 @@ export default function PhaseMatches(){
                                                     </p> */}
 
                                                     <div className="mt-2 flex flex-wrap gap-2">
-                                                        {awayPicks.map((draft : any) => (
+                                                        {sortedAwayPicks.map((draft : any) => (
                                                             <img
                                                                 key={draft.id}
                                                                 src={`http://localhost:8080/${draft.hero.logo}`}
@@ -307,7 +311,7 @@ export default function PhaseMatches(){
 
                                                             {/* HOME BANS */}
                                                             <div className="flex flex-wrap gap-2">
-                                                                {homeBans.map((draft: any) => (
+                                                                {sortedHomeBans.map((draft: any) => (
                                                                     <img
                                                                         key={draft.id}
                                                                         src={`http://localhost:8080/${draft.hero.logo}`}
@@ -324,7 +328,7 @@ export default function PhaseMatches(){
 
                                                             {/* AWAY BANS */}
                                                             <div className="flex flex-wrap gap-2">
-                                                                {awayBans.map((draft: any) => (
+                                                                {sortedAwayBans.map((draft: any) => (
                                                                     <img
                                                                         key={draft.id}
                                                                         src={`http://localhost:8080/${draft.hero.logo}`}

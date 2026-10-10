@@ -3,10 +3,13 @@ package controllers
 import (
 	"errors"
 	"mpl-team/config"
+	apperrors "mpl-team/errors"
 	"mpl-team/models"
 	"mpl-team/services"
 	"net/http"
 	"strconv"
+
+	"github.com/go-playground/validator/v10"
 
 	"gorm.io/gorm"
 
@@ -113,8 +116,29 @@ func (mc *MatchController) CreateMatch(c *gin.Context) {
 
 	// Binding HTTP request
 	if err := c.ShouldBindJSON(&input); err != nil {
+		errors := make(map[string]string)
+
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			for _, fieldErr := range validationErrors {
+				switch fieldErr.Field() {
+				case "HomeTeamID":
+					errors["home_team_id"] = "Home team wajib diisi"
+				case "AwayTeamID":
+					errors["away_team_id"] = "Away team wajib diisi"
+				case "EventID":
+					errors["event_id"] = "Event wajib diisi"
+				case "Date":
+					errors["date"] = "Date wajib diisi"
+				case "Time":
+					errors["time"] = "Time wajib diisi"
+				}
+			}
+		} else {
+			errors["general"] = "Invalid request data"
+		}
+
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"errors": errors,
 		})
 		return
 	}
@@ -131,10 +155,16 @@ func (mc *MatchController) CreateMatch(c *gin.Context) {
 
 	// Call service
 	match, err := mc.MatchService.CreateMatch(matchInput)
-
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+		if validationErr, ok := err.(apperrors.ValidationErrors); ok {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"errors": validationErr,
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to create match",
 		})
 		return
 	}

@@ -16,6 +16,13 @@ export default function CreateMatch() {
     const [time, setTime] = useState<string>("");
     const [best_of, setBestOf] = useState<number>(1);
     const navigate = useNavigate();
+    const [errors, setErrors] = useState<{
+        home_team_id?: number;
+        away_team_id?: number;
+        event_id?: number;
+        date?: string;
+        time?: string;
+        best_of?: string;}>({});
 
 
     interface Team {
@@ -58,6 +65,7 @@ export default function CreateMatch() {
     },[])
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setErrors({});
         const formattedTime = time.length === 5 ? time + ":00" : time; // Add seconds if not present
         const data = {
             home_team_id,
@@ -70,8 +78,13 @@ export default function CreateMatch() {
         try {
             await api.post("/matches", data);
             navigate("/dashboard/match");
-        } catch (error) {
+        } catch (error : any) {
             console.error("Error creating match:", error);
+            setErrors(
+            error.response?.data?.errors ?? {
+                general: "Failed to create match",
+            }
+    );
         }
     };
 
@@ -103,6 +116,11 @@ export default function CreateMatch() {
         <div className='p-4'>
             <p className="font-semibold text-xl mb-3">Create Match Page</p>
             <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
+                {errors.general && (
+                    <p className="text-sm text-red-500 mb-3">
+                        {errors.general}
+                    </p>
+                )}
                 <div className="flex gap-2 items-center">
                     <label htmlFor="home_team" className="input-label">Home Team</label>
                     <select name="home_team" id="home_team" value={home_team_id} className="w-40 select-field"
@@ -113,6 +131,11 @@ export default function CreateMatch() {
                     ))}
 
                     </select>
+                    {errors.home_team_id && (
+                        <p className="text-red-500 text-sm">{errors.home_team_id}</p>
+                    )
+
+                    }
                 
                 </div>
                 <div className="flex gap-2 items-center">
@@ -124,6 +147,11 @@ export default function CreateMatch() {
                         <option key={team.id} value={team.id}>{team.name}</option>
                     ))}
                     </select>
+                    {errors.away_team_id && (
+                        <p className="text-red-500 text-sm">{errors.away_team_id}</p>
+                    )
+
+                    }
                 </div>
                 
                 <div className="flex gap-2 items-center">
@@ -137,22 +165,42 @@ export default function CreateMatch() {
                             cacheOptions
                             defaultOptions
                         />
+                    {errors.event_id && (
+                        <p className="text-red-500 text-sm">{errors.event_id}</p>
+                    )
+
+                    }
                 </div>
                 <div className="flex gap-2 items-center">
                     <label htmlFor="best_of" className="input-label">Best Of</label>
                     <input value={best_of} type="number" id="best_of" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setBestOf(Number(e.target.value))} />
+                    {errors.best_of && (
+                        <p className="text-red-500 text-sm">{errors.best_of}</p>
+                    )
+
+                    }
                 </div>
                 <div className="flex gap-2 items-center">
                     <label htmlFor="date" className="input-label">Date</label>
                     <input value={date} type="date" id="date" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setDate(e.target.value)} />
+                    {errors.date && (
+                        <p className="text-red-500 text-sm">{errors.date}</p>
+                    )
+
+                    }
                 </div>
 
                 <div className="flex gap-2 items-center">
                     <label htmlFor="time" className="input-label">Time</label>
                     <input value={time} type="time" id="time" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setTime(e.target.value)} />
+                    {errors.time && (
+                        <p className="text-red-500 text-sm">{errors.time}</p>
+                    )
+
+                    }
                 </div>
                 <button type="submit" className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Add Match</button>
             </form>

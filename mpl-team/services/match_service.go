@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	apperrors "mpl-team/errors"
 	"time"
 
 	"mpl-team/models"
@@ -38,23 +39,24 @@ func (s *MatchService) CreateMatch(
 
 	// 1. Validate home & away
 	if input.HomeTeamID == input.AwayTeamID {
-		return nil, errors.New(
-			"home team and away team cannot be the same",
-		)
+		return nil, apperrors.ValidationErrors{
+			"away_team_id": "Home team and away team cannot be the same",
+		}
 	}
 
 	// 2. Validate date
 	if _, err := time.Parse("2006-01-02", input.Date); err != nil {
-		return nil, errors.New(
-			"invalid date format, use YYYY-MM-DD",
-		)
+		return nil, apperrors.ValidationErrors{
+			"date": "invalid date format, use YYYY-MM-DD",
+		}
 	}
 
 	// 3. Validate time
 	if _, err := time.Parse("15:04:05", input.Time); err != nil {
-		return nil, errors.New(
-			"invalid time format, use HH:MM:SS",
-		)
+		return nil, apperrors.ValidationErrors{
+			"time": "invalid time format, use HH:MM:SS",
+		}
+
 	}
 
 	// 4. Validate BestOf
@@ -63,25 +65,31 @@ func (s *MatchService) CreateMatch(
 			*input.BestOf != 5 &&
 			*input.BestOf != 7 {
 
-			return nil, errors.New(
-				"best of must be 3, 5 or 7",
-			)
+			return nil, apperrors.ValidationErrors{
+				"best_of": "best of must be 3, 5 or 7",
+			}
 		}
 	}
 
 	// 5. Check home team
 	if _, err := s.MatchRepository.FindTeamByID(input.HomeTeamID); err != nil {
-		return nil, errors.New("home team not found")
+		return nil, apperrors.ValidationErrors{
+			"home_team_id": "home team not found",
+		}
 	}
 
 	// 6. Check away team
 	if _, err := s.MatchRepository.FindTeamByID(input.AwayTeamID); err != nil {
-		return nil, errors.New("away team not found")
+		return nil, apperrors.ValidationErrors{
+			"away_team_id": "away team not found",
+		}
 	}
 
 	// 7. Check event
 	if _, err := s.MatchRepository.FindEventByID(input.EventID); err != nil {
-		return nil, errors.New("event not found")
+		return nil, apperrors.ValidationErrors{
+			"event_id": "event not found",
+		}
 	}
 
 	// 8. Create model

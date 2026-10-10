@@ -68,3 +68,21 @@ func (r *HeroDraftRepository) Delete(
 		id,
 	).Error
 }
+
+func (r *HeroDraftRepository) ExistsByGameIDAndHeroIDs(
+	tx *gorm.DB,
+	gameID uint,
+	heroIDs []uint,
+) (bool, error) {
+	var count int64
+
+	err := tx.Model(&models.HeroDraft{}).
+		Where("game_id = ? AND hero_id IN ?", gameID, heroIDs).
+		Count(&count).Error
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}

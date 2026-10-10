@@ -11,6 +11,7 @@ export default function GameCreate(){
     const [match, setMatch] = useState<Match | null>(null);
     const [minutes, setMinutes] = useState<number>(0);
     const [seconds, setSeconds] = useState<number>(0);
+    const [errors, setErrors] = useState<Record<string, string>>({});
     const navigate = useNavigate()
 
     const convertToSeconds = (minutes: number, seconds: number) => {
@@ -38,6 +39,7 @@ export default function GameCreate(){
                 setMatch(response.data.data)
             } catch (error) {
                 console.error("Error fetching matches", error)
+                
             }
         }
         fetchMatch()
@@ -51,7 +53,16 @@ export default function GameCreate(){
             navigate(`/dashboard/match/${id}`)
         }catch (error : any) {
             console.error("Error creating games", error)
-        }
+            const response = error.response?.data;
+
+                if (response?.errors) {
+                    setErrors(response.errors);
+                } else if (response?.message) {
+                    setErrors({
+                        general: response.message,
+                    });
+                }
+                    }
     }
     return (
         <div className="p-4">
@@ -59,15 +70,19 @@ export default function GameCreate(){
             <div className="header-title">Create Game</div>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+                {errors.general && 
+                <div className="text-sm text-red-500">{errors.general}</div>}
                 <div className="input-container">
                     <label htmlFor="game_number" className="input-label">Game</label>
                     <input value={game_number} type="text" id="game_number" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setGameNumber(Number(e.target.value))} />
+                    {errors.game_number && <div className="text-sm text-red-500">{errors.game_number}</div>}
                 </div>
                 <div className="input-container">
                     <label htmlFor="duration" className="input-label">Durasi (dalam detik)</label>
                     <input value={duration} type="text" id="duration" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setDuration(Number(e.target.value))} />
+                    {errors.duration && <div className="text-sm text-red-500">{errors.duration}</div>}
                 </div>
                 <div className="input-container">
                     <label htmlFor="winner_team" className="input-label">Tim Pemenang</label>
@@ -77,6 +92,7 @@ export default function GameCreate(){
                         <option value={match?.home_team.id}>{match?.home_team.short_name}</option>
                         <option value={match?.away_team.id}>{match?.away_team.short_name}</option>
                     </select>
+                    {errors.winner_team_id && <div className="text-sm text-red-500">{errors.winner_team_id}</div>}
                 </div>
                 <div className="input-container">
                     <label htmlFor="first_pick_team" className="input-label">Tim Pertama Memilih</label>
@@ -86,6 +102,7 @@ export default function GameCreate(){
                         <option value={match?.home_team.id}>{match?.home_team.short_name}</option>
                         <option value={match?.away_team.id}>{match?.away_team.short_name}</option>
                     </select>
+                    {errors.first_pick_team_id && <div className="text-sm text-red-500">{errors.first_pick_team_id}</div>}
                 </div>
                 <button type="submit" className="button">Add Game</button>
             </form>

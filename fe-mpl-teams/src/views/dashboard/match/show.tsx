@@ -18,6 +18,9 @@ export default function DashboardMatchShow(){
     const bans = drafts.filter(draft => draft.type === "ban");
     const picks = drafts.filter(draft => draft.type === "pick");
 
+    const sortedBans = bans.sort((a,b) => a.id - b.id);
+    const sortedPicks = picks.sort((a,b) => a.id - b.id);
+
     interface Draft {
         id: number,
         game: {
@@ -224,7 +227,7 @@ export default function DashboardMatchShow(){
                     </h3>
 
                     <div className="grid grid-cols-5 gap-3 mb-6">
-                        {bans.map(draft => (
+                        {sortedBans.map(draft => (
                             <div key={draft.id}>
                                 <img
                                     src={`http://localhost:8080/${draft.hero.logo}`}
@@ -248,7 +251,7 @@ export default function DashboardMatchShow(){
                     </h3>
 
                     <div className="grid grid-cols-5 gap-3">
-                        {picks.map(draft => (
+                        {sortedPicks.map(draft => (
                             <div key={draft.id}>
                                 <img
                                     src={`http://localhost:8080/${draft.hero.logo}`}

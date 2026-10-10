@@ -214,7 +214,7 @@ const getMatch = (
                                         aggAway = match2.home_score
                                     } else if(!match2) {
                                         aggHome = match1.home_score;
-                                        aggAway = match2.away_score;
+                                        aggAway = match1.away_score;
                                     }else {
                                         aggHome = match1.home_score + match2.away_score;
                                         aggAway = match1.away_score + match2.home_score;

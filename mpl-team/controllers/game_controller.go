@@ -123,8 +123,9 @@ func (gc *GameController) CreateGame(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   err.Error(),
-			"message": "Invalid request",
+			"errors": gin.H{
+				"general": "Invalid request",
+			},
 		})
 		return
 	}
@@ -133,37 +134,31 @@ func (gc *GameController) CreateGame(c *gin.Context) {
 	// Basic Validation
 	// =========================
 
+	errors := make(map[string]string)
+
 	if input.MatchID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Match ID is required",
-		})
-		return
+		errors["match_id"] = "Match wajib dipilih"
 	}
 
 	if input.GameNumber <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Game number must be greater than 0",
-		})
-		return
+		errors["game_number"] = "Game number harus lebih besar dari 0"
 	}
 
 	if input.Duration <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Duration must be greater than 0",
-		})
-		return
+		errors["duration"] = "Duration harus lebih besar dari 0"
 	}
 
 	if input.WinnerTeamID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Winner team is required",
-		})
-		return
+		errors["winner_team_id"] = "Winner team wajib dipilih"
 	}
 
 	if input.FirstPickTeamID == 0 {
+		errors["first_pick_team_id"] = "First pick team wajib dipilih"
+	}
+
+	if len(errors) > 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "First pick team is required",
+			"errors": errors,
 		})
 		return
 	}
