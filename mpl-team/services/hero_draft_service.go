@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 
+	apperrors "mpl-team/errors"
 	"mpl-team/models"
 	"mpl-team/repositories"
 
@@ -52,38 +53,43 @@ func (s *heroDraftService) CreateMany(
 	heroIDs []uint,
 ) error {
 	if gameID == 0 {
-		return errors.New("game_id is required")
+		return apperrors.ValidationErrors{
+			"game_id": "Game wajib diisi",
+		}
 	}
 
 	if teamID == 0 {
-		return errors.New("team_id is required")
+		return apperrors.ValidationErrors{
+			"team_id": "Tim wajib diisi",
+		}
 	}
 
 	if draftType != models.HeroDraftPick &&
 		draftType != models.HeroDraftBan {
-		return errors.New("type must be pick or ban")
+		return apperrors.ValidationErrors{
+			"type": "Type harus pick atau ban",
+		}
 	}
 
-	if len(heroIDs) < 1 {
-		return errors.New("hero_ids is required")
+	if len(heroIDs) != 5 {
+		return apperrors.ValidationErrors{
+			"hero_ids": "Pilih tepat 5 hero",
+		}
 	}
 
-	if len(heroIDs) > 5 {
-		return errors.New("maximum 5 heroes")
-	}
-
-	// Validasi hero duplikat dalam request yang sama.
 	seen := make(map[uint]bool)
 
 	for _, heroID := range heroIDs {
 		if heroID == 0 {
-			return errors.New("hero_id cannot be 0")
+			return apperrors.ValidationErrors{
+				"hero_ids": "Hero ID tidak valid",
+			}
 		}
 
 		if seen[heroID] {
-			return errors.New(
-				"hero cannot be selected more than once",
-			)
+			return apperrors.ValidationErrors{
+				"hero_ids": "Hero tidak boleh dipilih lebih dari sekali",
+			}
 		}
 
 		seen[heroID] = true

@@ -131,7 +131,7 @@ export default function EditMatch() {
                     readOnly />
                 </div>
 
-               
+
                 <div className="flex gap-2 items-center">
                     <label htmlFor="date" className="input-label">Date</label>
                     <input value={date} type="date" id="date" className="mt-1 block w-50 input-field" 

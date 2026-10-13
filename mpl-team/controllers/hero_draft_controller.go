@@ -1,10 +1,13 @@
 package controllers
 
 import (
+	apperrors "mpl-team/errors"
 	"mpl-team/models"
 	"mpl-team/services"
 	"net/http"
 	"strconv"
+
+	"github.com/go-playground/validator/v10"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,15 +34,35 @@ func (c *HeroDraftController) Create(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
+		errors := make(map[string]string)
+
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			for _, fieldErr := range validationErrors {
+				switch fieldErr.Field() {
+				case "GameID":
+					errors["game_id"] = "Game wajib diisi"
+				case "TeamID":
+					errors["team_id"] = "Team wajib diisi"
+				case "Type":
+					errors["type"] = "Type wajib diisi"
+				case "HeroIDs":
+					errors["hero_ids"] = "Hero wajib dipilih"
+				}
+			}
+		} else {
+			errors["general"] = "Invalid request data"
+		}
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"errors": errors,
 		})
 		return
 	}
 
 	if len(input.HeroIDs) != 5 {
-		ctx.JSON(400, gin.H{
-			"error": "must select exactly 5 heroes",
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"errors": gin.H{
+				"hero_ids": "Pilih tepat 5 hero",
+			},
 		})
 		return
 	}
@@ -50,8 +73,15 @@ func (c *HeroDraftController) Create(ctx *gin.Context) {
 		input.Type,
 		input.HeroIDs,
 	); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+		if validationErr, ok := err.(apperrors.ValidationErrors); ok {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"errors": validationErr,
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to create hero drafts",
 		})
 		return
 	}

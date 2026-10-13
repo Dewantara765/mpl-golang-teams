@@ -177,9 +177,9 @@ func (s *MatchService) UpdateMatch(id uint,
 	}
 
 	if match.Status == "completed" {
-		return nil, errors.New(
-			"completed match cannot be updated",
-		)
+		return nil, apperrors.ValidationErrors{
+			"status": "Match yang sudah selesai tidak bisa diupdatee",
+		}
 	}
 
 	if input.Date != nil {

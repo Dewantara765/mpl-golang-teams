@@ -11,7 +11,7 @@ export default function CreateDraft() {
     const [team_id, setTeamId] = useState<number>(0);
     const [selectedHeroes, setSelectedHeroes] = useState<number[]>([]);
     const [type, setType] = useState<string>("");
-    const [error, setError] = useState<string>("");
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     interface Match {
         id: number,
@@ -99,9 +99,17 @@ export default function CreateDraft() {
             await api.post("/hero-drafts", data);
             setSelectedHeroes([]);
             navigate(`/dashboard/match/${id}`);
-        } catch (error) {
+        } catch (error : any) {
             console.error("Error creating draft:", error);
-            setError(error)
+            const response = error.response?.data;
+
+                if (response?.errors) {
+                    setErrors(response.errors);
+                } else if (response?.message) {
+                    setErrors({
+                        general: response.message,
+                    });
+                }
         }
     }
 
@@ -122,6 +130,7 @@ export default function CreateDraft() {
                 
 
                     </select>
+                    {errors.team_id && <div className="text-sm text-red-500">{errors.team_id}</div>}
                 </div>
                 
                 <div className="flex gap-2 items-center">
@@ -135,6 +144,7 @@ export default function CreateDraft() {
                 
 
                     </select>
+                    {errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
                 </div>
                 <div className="flex gap-2">
                     <label htmlFor="type" className="input-label">Heroes ({selectedHeroes.length}/5)</label>
@@ -155,6 +165,7 @@ export default function CreateDraft() {
                             </button>
                         ))}
                     </div>
+                    {errors.hero_ids && <div className="text-sm text-red-500">{errors.hero_ids}</div>}
                 </div>
                 <div className="mt-4">
                     <h3 className="font-semibold">
