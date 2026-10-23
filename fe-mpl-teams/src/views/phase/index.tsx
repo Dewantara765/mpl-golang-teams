@@ -77,6 +77,7 @@ export default function MatchIndex() {
         (standing) => standing.team
     ) ?? [];
     
+    const sortedTeams = teams.sort((a,b) => a.id - b.id);
 
     const matches = phase?.events.flatMap(
         (event: { matches }) => event.matches
@@ -93,14 +94,60 @@ export default function MatchIndex() {
         ])
     );
 
-const getMatch = (
-        homeTeamId: number,
-        awayTeamId: number
-    ) => {
-        return matchMap.get(
-            `${homeTeamId}-${awayTeamId}` 
-        );
+const getHeadToHead = (
+    teamId: number,
+    opponentId: number
+) => {
+    // Ambil kedua pertemuan, apa pun posisi home/away-nya.
+    const allMatches = matches.filter(
+        (match) =>
+            (
+                match.home_team_id === teamId &&
+                match.away_team_id === opponentId
+            ) ||
+            (
+                match.home_team_id === opponentId &&
+                match.away_team_id === teamId
+            )
+    );
+
+    // Hanya pertandingan yang sudah selesai.
+    const completedMatches = allMatches.filter(
+        (match) =>
+            match.status === "completed" &&
+            match.home_score != null &&
+            match.away_score != null
+    );
+
+    let teamTotal = 0;
+    let opponentTotal = 0;
+
+    const details = completedMatches.map((match) => {
+        const isHome = match.home_team_id === teamId;
+
+        const teamScore = isHome
+            ? match.home_score!
+            : match.away_score!;
+
+        const opponentScore = isHome
+            ? match.away_score!
+            : match.home_score!;
+
+        teamTotal += teamScore;
+        opponentTotal += opponentScore;
+
+        return `${teamScore}-${opponentScore}`;
+    });
+
+    return {
+        teamTotal,
+        opponentTotal,
+        played: completedMatches.length,
+        total: allMatches.length,
+        details,
     };
+};
+
 
 
     return (
@@ -147,7 +194,7 @@ const getMatch = (
                                     <td className="border border-gray-300 px-1 py-2">
                                         <div className="flex gap-2">
                                             <img src={`http://localhost:8080/${standing.team.logo}`} alt={standing.team.name} 
-                                                className="w-8 lg:w-10 object-cover"/>
+                                                className="w-8 h-8 lg:w-10 lg:h-10 object-contain"/>
                                             <div>{standing.team.name}</div>
                                         </div>
                                         
@@ -164,13 +211,12 @@ const getMatch = (
                         </tbody>
                         </table>
                         <div>
-                       
                         <div className='sub-header-title'>Tabel Head-to-head</div>
                         <table>
                             <thead>
                                 <tr>
                                     <th>H/A</th>
-                                    {teams.map((team) => (
+                                    {sortedTeams.map((team) => (
                                         <th className="border border-gray-300 py-2 w-20" key={team.id}>
                                             {team.short_name}
                                         </th>
@@ -178,83 +224,61 @@ const getMatch = (
                                 </tr>
                             </thead>
                             <tbody>
-                            {teams.map((homeTeam) => (
+                            {sortedTeams.map((homeTeam) => (
                                 <tr key={homeTeam.id}>
                                     <th className="border border-gray-300 w-15 py-2">
                                         {homeTeam.short_name}
                                     </th>
 
-                                    {teams.map((awayTeam) =>  {
-                                        const isSameTeam = homeTeam.id === awayTeam.id;
-
-                                        if (isSameTeam) {
-                                        return (
-                                            <td
-                                                key={awayTeam.id}
-                                                className="bg-slate-500"
-                                            />
+                                    {sortedTeams.map((awayTeam) =>  {
+                                        const result = getHeadToHead(
+                                            homeTeam.id,
+                                            awayTeam.id
                                         );
-                                    }
 
-                                    const match1 = getMatch(
-                                        homeTeam.id,
-                                        awayTeam.id
-                                    );
+                                        const bgColor =
+                                            result.played === 0
+                                                ? "bg-white"
+                                                : result.teamTotal > result.opponentTotal
+                                                ? "bg-green-200"
+                                                : result.teamTotal < result.opponentTotal
+                                                ? "bg-red-200"
+                                                : "bg-yellow-200";
 
-                                    const match2 = getMatch(
-                                        awayTeam.id,
-                                        homeTeam.id
-                                    );
+                                    
 
-                                    let aggHome = 0;
-                                    let aggAway = 0;
-
-                                    if (!match1) {
-                                        aggHome = match2.away_score;
-                                        aggAway = match2.home_score
-                                    } else if(!match2) {
-                                        aggHome = match1.home_score;
-                                        aggAway = match1.away_score;
-                                    }else {
-                                        aggHome = match1.home_score + match2.away_score;
-                                        aggAway = match1.away_score + match2.home_score;
-                                    }
-
-                                    let bgColor = "";
-
-                                    if (match1 || match2) {
-                                        if (
-                                            aggHome >
-                                            aggAway
-                                        ) {
-                                            bgColor = "bg-green-200";
-                                        } else if (
-                                            aggHome <
-                                            aggAway
-                                        ) {
-                                            bgColor = "bg-red-200";
-                                        } else {
-                                            bgColor = "bg-yellow-200";
-                                        }
-                                    }
+                                    
                                         return (
-                                        <td className={`border border-gray-300 px-1 py-2 ${bgColor} text-center`} key={awayTeam.id}>
-                                            {match1 || match2
-                                                ? <div>
-                                                    <div>{aggHome}-{aggAway}</div>
-                                                    <div className='text-xs'>{match1.home_score}-{match1.away_score}, {match2.away_score}-{match2.home_score}</div>
-                                                </div>
-                                                : "-"}
+                                        <td className={`border border-gray-300 px-1 py-2 ${homeTeam.id === awayTeam.id ? "bg-gray-300": bgColor} text-center`} key={awayTeam.id}>
+                                            {homeTeam.id === awayTeam.id ? (
+                                                <div className="bg-slate-500 h-full" />
+                                            ) : (
+                                                <>
+                                                    <div className="font-medium">
+                                                        {result.played > 0
+                                                            ? `${result.teamTotal}-${result.opponentTotal}`
+                                                            : "-"}
+                                                    </div>
+
+                                                    <div className="text-xs">
+                                                        {result.details.join(", ")}
+                                                        {result.played > 0 &&
+                                                            result.played < result.total &&
+                                                            ","}
+                                                    </div>
+                                                </>
+                                            )}
                                         </td>
                                     )})}
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                    {/* {aggregate(7, 9)} */}
+                    {/* {matches} */}
                         </div>
                     </div>
                 )
+                
                 
                 }
                     </div>

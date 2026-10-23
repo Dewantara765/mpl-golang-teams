@@ -106,8 +106,8 @@ func (mc *MatchController) FindMatchByID(c *gin.Context) {
 func (mc *MatchController) CreateMatch(c *gin.Context) {
 
 	var input struct {
-		HomeTeamID uint   `json:"home_team_id" binding:"required"`
-		AwayTeamID uint   `json:"away_team_id" binding:"required"`
+		HomeTeamID *uint  `json:"home_team_id"`
+		AwayTeamID *uint  `json:"away_team_id"`
 		EventID    uint   `json:"event_id" binding:"required"`
 		BestOf     *int   `json:"best_of"`
 		Date       string `json:"date" binding:"required"`
@@ -121,10 +121,6 @@ func (mc *MatchController) CreateMatch(c *gin.Context) {
 		if validationErrors, ok := err.(validator.ValidationErrors); ok {
 			for _, fieldErr := range validationErrors {
 				switch fieldErr.Field() {
-				case "HomeTeamID":
-					errors["home_team_id"] = "Home team wajib diisi"
-				case "AwayTeamID":
-					errors["away_team_id"] = "Away team wajib diisi"
 				case "EventID":
 					errors["event_id"] = "Event wajib diisi"
 				case "Date":
@@ -145,8 +141,8 @@ func (mc *MatchController) CreateMatch(c *gin.Context) {
 
 	// Convert HTTP input → service input
 	matchInput := services.CreateMatchInput{
-		HomeTeamID: input.HomeTeamID,
-		AwayTeamID: input.AwayTeamID,
+		HomeTeamID: *input.HomeTeamID,
+		AwayTeamID: *input.AwayTeamID,
 		EventID:    input.EventID,
 		BestOf:     input.BestOf,
 		Date:       input.Date,

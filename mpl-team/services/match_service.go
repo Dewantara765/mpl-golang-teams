@@ -162,9 +162,11 @@ func (s *MatchService) FindMatchByID(id uint) (*models.Match, error) {
 }
 
 type UpdateMatchInput struct {
-	BestOf *int
-	Date   *string
-	Time   *string
+	BestOf            *int
+	Date              *string
+	Time              *string
+	WinnerNextMatchID *uint
+	LoserNextMatchID  *uint
 }
 
 func (s *MatchService) UpdateMatch(id uint,
@@ -192,6 +194,20 @@ func (s *MatchService) UpdateMatch(id uint,
 
 	if input.BestOf != nil {
 		match.BestOf = input.BestOf
+	}
+
+	if input.WinnerNextMatchID != nil {
+		match.WinnerNextMatchID = input.WinnerNextMatchID
+	}
+
+	if input.LoserNextMatchID != nil {
+		match.LoserNextMatchID = input.LoserNextMatchID
+	}
+
+	if input.WinnerNextMatchID == input.LoserNextMatchID {
+		return nil, apperrors.ValidationErrors{
+			"loser_next_match_id": "Winner dan Loser next match tidak boleh sama",
+		}
 	}
 
 	if err := s.MatchRepository.Update(match); err != nil {

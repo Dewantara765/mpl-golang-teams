@@ -16,6 +16,9 @@ export default function PhaseMatches(){
     const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
     const [showBans, setShowBans] = useState<Record<number, boolean>>({});
 
+    
+
+    
     interface Phase {
         id: number,
         name: string,
@@ -103,37 +106,108 @@ export default function PhaseMatches(){
         <div className="p-4">
             
             <div className="header-title">List Match</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {phase.events.map((event) => (
-                    <div key={event.id}>
-                        <div className="font-semibold">{event.name}</div>
-                        <table className="table-container">
-                        <tbody>
+        {phase.name === "Playoff" &&
+            <div className="grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 xl:grid-cols-3">
+            {/* Baris atas */}
+            <section className="xl:col-start-1 xl:row-start-1">
+                <h2 className="mb-5 text-lg font-semibold">Play-in</h2>
+                
+            {phase.events
+            .filter((event) => event.name === "Play-in")
+            .map((event) => (
+                <div
+                key={event.id}
+                className="space-y-4"
+                >
+                {event.matches.map((match: any) => (
+                    <div key={match.id} className="overflow-hidden border border-gray-400">
+                    <div className="flex items-center justify-between p-3">
+                        <span>{match.home_team?.short_name ?? "TBD"}</span>
+                        <span>{match.home_score ?? "-"}</span>
+                    </div>
 
-                        {event.matches.map((match) => (
-                            <tr key={match.id} onClick={() => setSelectedMatch(match)}>
-                                <td className={`table-cell ${match.home_score > match.away_score ? "font-bold bg-green-200" : ""}`}>
-                                    <div className="flex gap-2">
-                                        <img src={`http://localhost:8080/${match.home_team.logo}`} alt={match.home_team.name}
-                                        className="w-7 object-contain"/>
-                                        <div>{match.home_team.short_name}</div>
-                                    </div></td>
-                                <td className={`table-cell ${match.home_score > match.away_score ? "font-bold" : ""}`}>{match.home_score}</td>
-                                <td className={`table-cell ${match.home_score < match.away_score ? "font-bold" : ""}`}>{match.away_score}</td> 
-                                <td className={`table-cell ${match.home_score < match.away_score ? "font-bold bg-green-200" : ""}`}>
-                                    <div className="flex gap-2">
-                                        <div>{match.away_team.short_name}</div>
-                                        <img src={`http://localhost:8080/${match.away_team.logo}`} alt={match.away_team.short_name}
-                                        className="w-7 object-contain"/>
-                                    </div>
-                                    
-                                </td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                    <div className="border-t border-gray-300" />
+
+                    <div className="flex items-center justify-between p-3">
+                        <span>{match.away_team?.short_name ?? "TBD"}</span>
+                        <span>{match.away_score ?? "-"}</span>
+                    </div>
                     </div>
                 ))}
+                </div>
+            ))}
+
+            </section>
+
+            <section className="xl:col-start-2 xl:row-start-1">
+                <h2 className="mb-5 text-lg font-semibold">
+                Semifinal Upper Bracket
+                </h2>
+                {/* Match Semifinal UB */}
+            </section>
+
+            <section className="xl:col-start-3 xl:row-start-1">
+                <h2 className="mb-5 text-lg font-semibold">
+                Final Upper Bracket
+                </h2>
+                {/* Match Final UB */}
+            </section>
+
+            {/* Baris bawah */}
+            <section className="xl:col-start-2 xl:row-start-2">
+                <h2 className="mb-5 text-lg font-semibold">
+                Semifinal Lower Bracket
+                </h2>
+                {/* Match Semifinal LB */}
+            </section>
+
+            <section className="xl:col-start-3 xl:row-start-2">
+                <h2 className="mb-5 text-lg font-semibold">
+                Final Lower Bracket
+                </h2>
+                {/* Match Final LB */}
+            </section>
+
+            {/* Grand Final */}
+            <section className="xl:col-start-3 xl:row-start-3">
+                <h2 className="mb-5 text-lg font-semibold">Grand Final</h2>
+                {/* Match Grand Final */}
+            </section>
+            </div>
+        }
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                
+                    {phase.events.map((event) => (
+                        <div key={event.id}>
+                            <div className="font-semibold">{event.name}</div>
+                            <table className="table-container">
+                            <tbody>
+
+                            {event.matches.map((match) => (
+                                <tr key={match.id} onClick={() => setSelectedMatch(match)}>
+                                    <td className={`table-cell ${match.home_score > match.away_score ? "font-bold bg-green-200" : ""}`}>
+                                        <div className="flex gap-2">
+                                            <img src={`http://localhost:8080/${match.home_team.logo}`} alt={match.home_team.name}
+                                            className="w-7 h-7 object-contain"/>
+                                            <div>{match.home_team.short_name}</div>
+                                        </div></td>
+                                    <td className={`table-cell ${match.home_score > match.away_score ? "font-bold" : ""}`}>{match.home_score}</td>
+                                    <td className={`table-cell ${match.home_score < match.away_score ? "font-bold" : ""}`}>{match.away_score}</td> 
+                                    <td className={`table-cell ${match.home_score < match.away_score ? "font-bold bg-green-200" : ""}`}>
+                                        <div className="flex gap-2">
+                                            <div>{match.away_team.short_name}</div>
+                                            <img src={`http://localhost:8080/${match.away_team.logo}`} alt={match.away_team.short_name}
+                                            className="w-7 h-7 object-contain"/>
+                                        </div>
+                                        
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                        </div>
+                    ))}
                 {selectedMatch && (
                     <div
                         className="fixed inset-0 z-50 flex items-center justify-center bg-transparent p-4"
@@ -226,8 +300,8 @@ export default function PhaseMatches(){
                                                     <div className="flex items-center gap-2">
                                                         <h3 className="font-semibold">{selectedMatch.home_team.short_name}</h3> 
                                                         {game.winner_team_id === selectedMatch.home_team.id ? 
-                                                            <div className="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white">Menang</div> : 
-                                                            <div className="rounded bg-gray-500 px-2 py-1 text-xs font-semibold text-white">Kalah</div>}
+                                                            <div className="rounded bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">Menang</div> : 
+                                                            <div className="rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">Kalah</div>}
                                                     </div>
                                                     {/* Picks */}
                                                     {/* <p className="mt-3 text-xs font-semibold text-gray-500">
@@ -262,8 +336,8 @@ export default function PhaseMatches(){
                                                             
                                                         </h3>
                                                         {game.winner_team_id === selectedMatch.away_team.id ? 
-                                                                <div className="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white">Menang</div> : 
-                                                                <div className="rounded bg-gray-500 px-2 py-1 text-xs font-semibold text-white">Kalah</div>}
+                                                                <div className="rounded bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">Menang</div> : 
+                                                                <div className="rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">Kalah</div>}
                                                     </div>
                                                     {/* Picks */}
                                                     {/* <p className="mt-3 text-xs font-semibold text-gray-500">
