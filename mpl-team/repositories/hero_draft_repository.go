@@ -86,3 +86,18 @@ func (r *HeroDraftRepository) ExistsByGameIDAndHeroIDs(
 
 	return count > 0, nil
 }
+
+func (r *HeroDraftRepository) CountByGameIDAndType(
+	tx *gorm.DB,
+	gameID uint,
+	teamID uint,
+	draftType models.HeroDraftType,
+) (int64, error) {
+	var count int64
+
+	err := tx.Model(&models.HeroDraft{}).
+		Where("game_id = ? AND team_id = ? AND type = ?", gameID, teamID, draftType).
+		Count(&count).Error
+
+	return count, err
+}

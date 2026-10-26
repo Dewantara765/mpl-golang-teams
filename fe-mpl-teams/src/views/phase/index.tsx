@@ -254,7 +254,7 @@ const getHeadToHead = (
                                                 <div className="bg-slate-500 h-full" />
                                             ) : (
                                                 <>
-                                                    <div className="font-medium">
+                                                    <div className="font-semibold">
                                                         {result.played > 0
                                                             ? `${result.teamTotal}-${result.opponentTotal}`
                                                             : "-"}

@@ -96,6 +96,27 @@ func (s *heroDraftService) CreateMany(
 	}
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
+		count, err := s.repository.CountByGameIDAndType(
+			tx,
+			gameID,
+			teamID,
+			draftType,
+		)
+		if err != nil {
+			return err
+		}
+
+		if count+int64(len(heroIDs)) > 5 {
+			message := "Maksimal 5 hero pick per tim dalam satu game"
+
+			if draftType == models.HeroDraftBan {
+				message = "Maksimal 5 hero ban per tim dalam satu game"
+			}
+
+			return apperrors.ValidationErrors{
+				"hero_ids": message,
+			}
+		}
 		// Validasi hero yang sudah dipick atau diban.
 		exists, err := s.repository.ExistsByGameIDAndHeroIDs(
 			tx,
