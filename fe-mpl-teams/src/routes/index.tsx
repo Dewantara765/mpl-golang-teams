@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import Home from '../views/home.tsx'
 import DefaultLayout from '../layouts/DefaultLayout.tsx'
 import DashboardLayout from '../layouts/DashboardLayout.tsx'
+import AuthLayout from '../layouts/AuthLayout.tsx'
 import '../App.css'
 import Team from '../views/dashboard/team/index.tsx'
 import TeamCreate from '../views/dashboard/team/create.tsx'
@@ -31,6 +32,8 @@ import DashboardStandingIndex from '../views/dashboard/standing/index.tsx'
 import PhaseMatches from '../views/phase/match.tsx'
 import CreateDraft from '../views/dashboard/match/create_draft.tsx'
 import UpdateFirstPick from '../views/dashboard/match/update_fp.tsx'
+import Login from '../views/dashboard/auth/login.tsx'
+import AdminRoute from '../components/AdminRoute.tsx'
     
 export default function AppRoutes() {
   return (
@@ -44,30 +47,36 @@ export default function AppRoutes() {
         <Route path="/tournament/:slug/:phaseSlug" element={<PhaseMatches/>}/>
         
       </Route>
-      <Route element={<DashboardLayout />}>
-        <Route path="/dashboard/team" element={<Team />} />
-        <Route path="/dashboard/team/create" element={<TeamCreate />} />
-        <Route path="/dashboard/team/edit/:id" element={<TeamEdit />} />
-        <Route path="/dashboard/tournament" element={<DashboardTournamentIndex/>}/>
-        <Route path="/dashboard/tournament/edit/:id" element={<TournamentEdit/>}/>
-        <Route path="/dashboard/tournament/create" element={<TournamentCreate/>}/>
-        <Route path="/dashboard/phase" element={<DashboardPhaseIndex/>}/>
-        <Route path="/dashboard/phase/create" element={<PhaseCreate/>}/>
-        <Route path="/dashboard/phase/edit/:id" element={<PhaseEdit/>}/>
-        <Route path="/dashboard/event" element={<DashboardEventIndex/>}/>
-        <Route path="/dashboard/event/create" element={<EventCreate/>}/>
-        <Route path="/dashboard/event/edit/:id" element={<EventEdit/>}/>
-        <Route path="/dashboard/match" element={<DashboardMatchIndex/>}/>
-        <Route path="/dashboard/match/create" element={<CreateMatch/>}/>
-        <Route path="/dashboard/match/:id/create" element={<GameCreate/>}/>
-        <Route path="/dashboard/match/edit/:id" element={<EditMatch/>}/>
-        <Route path="/dashboard/match/:id" element={<DashboardMatchShow/>}/>
-        <Route path="/dashboard/hero" element={<DashboardHeroIndex/>}/>
-        <Route path="/dashboard/hero/create" element={<HeroCreate/>}/>
-        <Route path="/dashboard/hero/edit/:id" element={<HeroEdit/>}/>
-        <Route path="/dashboard/standing" element={<DashboardStandingIndex/>}/>
-        <Route path="/dashboard/match/:id/game/:game_id/create" element={<CreateDraft/>}/>
-        <Route path="/dashboard/match/:id/game/:game_id/update_fp" element={<UpdateFirstPick/>}/>
+      <Route element={<AuthLayout />}>
+        <Route path="/dashboard/login" element={<Login/>}/>
+      
+      </Route>
+      <Route element={<AdminRoute/>}>
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard/team" element={<Team />} />
+          <Route path="/dashboard/team/create" element={<TeamCreate />} />
+          <Route path="/dashboard/team/edit/:id" element={<TeamEdit />} />
+          <Route path="/dashboard/tournament" element={<DashboardTournamentIndex/>}/>
+          <Route path="/dashboard/tournament/edit/:id" element={<TournamentEdit/>}/>
+          <Route path="/dashboard/tournament/create" element={<TournamentCreate/>}/>
+          <Route path="/dashboard/phase" element={<DashboardPhaseIndex/>}/>
+          <Route path="/dashboard/phase/create" element={<PhaseCreate/>}/>
+          <Route path="/dashboard/phase/edit/:id" element={<PhaseEdit/>}/>
+          <Route path="/dashboard/event" element={<DashboardEventIndex/>}/>
+          <Route path="/dashboard/event/create" element={<EventCreate/>}/>
+          <Route path="/dashboard/event/edit/:id" element={<EventEdit/>}/>
+          <Route path="/dashboard/match" element={<DashboardMatchIndex/>}/>
+          <Route path="/dashboard/match/create" element={<CreateMatch/>}/>
+          <Route path="/dashboard/match/:id/create" element={<GameCreate/>}/>
+          <Route path="/dashboard/match/edit/:id" element={<EditMatch/>}/>
+          <Route path="/dashboard/match/:id" element={<DashboardMatchShow/>}/>
+          <Route path="/dashboard/hero" element={<DashboardHeroIndex/>}/>
+          <Route path="/dashboard/hero/create" element={<HeroCreate/>}/>
+          <Route path="/dashboard/hero/edit/:id" element={<HeroEdit/>}/>
+          <Route path="/dashboard/standing" element={<DashboardStandingIndex/>}/>
+          <Route path="/dashboard/match/:id/game/:game_id/create" element={<CreateDraft/>}/>
+          <Route path="/dashboard/match/:id/game/:game_id/update_fp" element={<UpdateFirstPick/>}/>
+        </Route>
       </Route>
     </Routes>
   )
