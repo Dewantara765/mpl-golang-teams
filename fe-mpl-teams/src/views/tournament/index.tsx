@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import { Link } from 'react-router-dom';
-import {api} from '../../services/api.ts';
+import api from '../../services/axios.ts';
 export default function TournamentIndex() { 
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
     interface Tournament {

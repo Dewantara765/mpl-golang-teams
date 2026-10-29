@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import {api} from '../services/api'
+import api from '../services/axios'
 export default function Home() {
     interface Team {
         id: number

@@ -1,6 +1,6 @@
 import { useState, useEffect} from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { api } from "../../../services/api";
+import  api  from "../../../services/axios";
 import { convertDuration } from "../../../../utils/duration";
 export default function GameCreate(){
     const {id} = useParams();
@@ -49,7 +49,7 @@ export default function GameCreate(){
         event.preventDefault()
         const data = {match_id : Number(id), game_number, duration, winner_team_id, first_pick_team_id}
         try {
-            await api.post("/games", data);
+            await api.post("/api/admin/games", data);
             navigate(`/dashboard/match/${id}`)
         }catch (error : any) {
             console.error("Error creating games", error)

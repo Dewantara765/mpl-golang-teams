@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { api } from "../../../services/api"
+import  api  from "../../../services/axios"
 
 export default function TournamentCreate() {
     const [name, setName]= useState<string>("")
@@ -17,7 +17,7 @@ export default function TournamentCreate() {
         event.preventDefault()
         const data = {name, slug, start_date, end_date}
         try {
-            await api.post("/tournaments", data, 
+            await api.post("/api/admin/tournaments", data, 
                 {headers: {"Content-Type" : "application/json"},}
 
             );

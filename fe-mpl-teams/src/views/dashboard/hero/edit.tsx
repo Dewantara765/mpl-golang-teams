@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { api } from "../../../services/api"
+import  api  from "../../../services/axios"
 export default function HeroEdit(){
     const {id} = useParams()
     const [name, setName] = useState<string>("")
@@ -43,7 +43,7 @@ export default function HeroEdit(){
         }
 
         try {
-            await api.put(`/heroes/${id}`, formData, {
+            await api.put(`/api/admin/heroes/${id}`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },

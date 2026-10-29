@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams, Link } from "react-router-dom"
-import { api } from "../../../services/api"
+import  api  from "../../../services/axios"
 import { formatDate } from "../../../../utils/formatDate"
 import { formatTime } from "../../../../utils/formatTime"
 import { convertDuration } from "../../../../utils/duration"

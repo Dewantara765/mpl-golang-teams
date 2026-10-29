@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { api } from "../../../services/api"
+import api from "../../../services/axios"
 
 export default function TeamEdit() {
     const { id } = useParams()
@@ -48,9 +48,10 @@ export default function TeamEdit() {
         }
 
         try {
-            await api.put(`/teams/${id}`, formData, {
+            await api.put(`/api/admin/teams/${id}`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
+                    
                 },
             })
             navigate("/dashboard/team")

@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react'
 import {useParams, useNavigate} from 'react-router-dom'
-import { api } from '../../../services/api'
+import  api  from '../../../services/axios'
 export default function TournamentEdit(){
     const {id} = useParams()
     const navigate = useNavigate()
@@ -33,7 +33,7 @@ export default function TournamentEdit(){
         event.preventDefault()
         const data = {name, slug, start_date, end_date}
         try {
-            await api.put(`/tournaments/${id}`, data, 
+            await api.put(`/api/admin/tournaments/${id}`, data, 
                 {headers: {"Content-Type" : "application/json"},}
             );
             navigate("/dashboard/tournament")

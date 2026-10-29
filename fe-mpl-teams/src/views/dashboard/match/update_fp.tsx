@@ -1,6 +1,6 @@
 import {useParams, useNavigate} from "react-router-dom";
 import { useEffect, useState } from "react";
-import { api } from "../../../services/api";
+import  api  from "../../../services/axios";
 export default function UpdateFirstPick() {
     const {id} = useParams();
     const {game_id} = useParams();
@@ -56,7 +56,7 @@ export default function UpdateFirstPick() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await api.put(`/games/${game_id}/first-pick`, { team_id });
+            await api.put(`/api/admin/games/${game_id}/first-pick`, { team_id });
             navigate(`/dashboard/match/${id}`);
         } catch (error) {
             console.error("Error updating First Pick:", error);

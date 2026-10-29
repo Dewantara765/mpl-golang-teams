@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { api } from "../../services/api"
+import api from "../../services/axios"
 import { getPaginationPages } from "../../../utils/pagination";
 import { Link, useSearchParams } from "react-router-dom";
 export default function HeroIndex(){

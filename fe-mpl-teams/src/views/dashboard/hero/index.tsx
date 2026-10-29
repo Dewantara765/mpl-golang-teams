@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useSearchParams } from "react-router-dom";
-import { api } from "../../../services/api"
+import  api  from "../../../services/axios"
 import { Link } from "react-router-dom";
 import { getPaginationPages } from "../../../../utils/pagination";
 export default function DashboardHeroIndex(){
@@ -57,7 +57,7 @@ export default function DashboardHeroIndex(){
     const handleDelete = async (id: number) => {
         if (window.confirm("Are you sure you want to delete this hero?")) {
             try {
-                await api.delete(`/heroes/${id}`)
+                await api.delete(`/api/admin/heroes/${id}`)
                 setHeroes(heroes.filter((hero: any) => hero.id !== id) || null)
             } catch (error : any) {
                 console.error("Error deleting team:", error)

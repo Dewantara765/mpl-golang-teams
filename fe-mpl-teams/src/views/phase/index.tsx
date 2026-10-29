@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react'
-import {api} from '../../services/api.ts'
+import api from '../../services/axios.ts'
 import {Link, useParams} from 'react-router-dom'
 
 export default function MatchIndex() {

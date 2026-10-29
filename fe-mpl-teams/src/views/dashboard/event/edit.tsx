@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react"
 import { useNavigate, useParams } from "react-router-dom";
-import {api} from "../../../services/api";
+import api from "../../../services/axios";
 export default function EventEdit() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -49,7 +49,7 @@ export default function EventEdit() {
         event.preventDefault()
         const data = {name, type, phase_id}
         try {
-            await api.put(`/events/${id}`, data, {
+            await api.put(`/api/admin/events/${id}`, data, {
                 headers: {"Content-Type" : "application/json"},}
             );
             navigate("/dashboard/event")

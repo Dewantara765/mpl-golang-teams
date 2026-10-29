@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import { api } from "../../../services/api";
+import  api  from "../../../services/axios";
 import { Link, useSearchParams } from "react-router-dom";
 import { getPaginationPages } from "../../../../utils/pagination";
 export default function DashboardEventIndex() {
@@ -60,9 +60,9 @@ export default function DashboardEventIndex() {
     const handleDelete = async (id: number) => {
         if (window.confirm("Are you sure you want to delete this event?")) {
             try {
-                await api.delete(`/events/${id}`);
+                await api.delete(`/api/admin/events/${id}`);
                 setEvents(events.filter((event: any) => event.id !== id) || null);
-            } catch (error) {
+            } catch (error : any) {
                 console.error("Error deleting event:", error);
                 alert(error.response?.data?.message ?? "Failed to delete event.");
             }

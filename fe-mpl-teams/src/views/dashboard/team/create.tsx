@@ -1,5 +1,5 @@
 import { useEffect, useState }from "react"
-import { api } from "../../../services/api"
+import api from "../../../services/axios"
 import { useNavigate } from "react-router-dom"
 
 
@@ -34,9 +34,10 @@ export default function TeamCreate() {
         }
 
         try {
-            await api.post("/teams", formData, {
+            await api.post("/api/admin/teams", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
+                    
                 },
             })
             

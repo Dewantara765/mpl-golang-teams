@@ -1,6 +1,6 @@
 import {useParams, useNavigate} from "react-router-dom";
 import { useEffect, useState } from "react";
-import { api } from "../../../services/api";
+import api  from "../../../services/axios";
 export default function CreateDraft() {
     const {id} = useParams();
     const navigate = useNavigate();
@@ -96,7 +96,7 @@ export default function CreateDraft() {
             game_id: Number(game_id),
         };
         try {
-            await api.post("/hero-drafts", data);
+            await api.post("/api/admin/hero-drafts", data);
             setSelectedHeroes([]);
             navigate(`/dashboard/match/${id}`);
         } catch (error : any) {

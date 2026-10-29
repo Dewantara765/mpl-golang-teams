@@ -1,4 +1,4 @@
-import { api } from "../../../services/api"
+import api from "../../../services/axios"
 import { useState, type FormEventHandler } from "react"
 import { useNavigate } from "react-router-dom"
 

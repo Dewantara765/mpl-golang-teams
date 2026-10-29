@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import { api } from "../../../services/api";
+import  api  from "../../../services/axios";
 import { Link, useSearchParams } from "react-router-dom";
 import { getPaginationPages } from "../../../../utils/pagination";
 export default function DashboardMatchIndex(){
@@ -74,7 +74,7 @@ export default function DashboardMatchIndex(){
 
     const handleDelete = async (id: number) => {
         try {
-            await api.delete(`/matches/${id}`);
+            await api.delete(`/api/admin/matches/${id}`);
             setMatches(matches.filter((match) => match.id !== id));
         }
         catch (error) {

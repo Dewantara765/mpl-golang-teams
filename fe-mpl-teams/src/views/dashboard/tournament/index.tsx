@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react'
-import {api} from "../../../services/api"
+import api from "../../../services/axios"
 import { Link } from 'react-router-dom'
 export default function DashboardTournamentIndex(){
     const [tournaments, setTournaments] = useState<Tournament[]>([])
@@ -26,7 +26,7 @@ export default function DashboardTournamentIndex(){
     const handleDelete = async(id: number) => {
          if (window.confirm("Are you sure you want to delete this team?")) {
             try {
-                await api.delete(`/tournaments/${id}`)
+                await api.delete(`/api/admin/tournaments/${id}`)
                 setTournaments(tournaments.filter((tournament: any) => tournament.id !== id) || null)
             } catch (error) {
                 console.error("Error deleting team:", error)

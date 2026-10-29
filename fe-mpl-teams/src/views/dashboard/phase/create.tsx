@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { api } from "../../../services/api"
+import  api  from "../../../services/axios"
 import { useNavigate } from "react-router-dom"
 export default function PhaseCreate(){
     const [name, setName] = useState<string>("")
@@ -33,7 +33,7 @@ export default function PhaseCreate(){
         event.preventDefault()
         const data = {name, slug, tournament_id, has_standing: hasStanding}
         try {
-            await api.post("/phases", data, {
+            await api.post("/api/admin/phases", data, {
                 headers: {"Content-Type" : "application/json"},}
             );
             navigate("/dashboard/phase")

@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react"
 import { useNavigate, useParams } from "react-router-dom";
-import { api } from "../../../services/api";
+import  api  from "../../../services/axios";
 export default function PhaseEdit() {
         const { id } = useParams<{ id: string }>();
         const [name, setName] = useState<string>("")
@@ -36,7 +36,7 @@ export default function PhaseEdit() {
         event.preventDefault()
         const data = {name, slug, has_standing: hasStanding}
         try {
-            await api.put(`/phases/${id}`, data, {
+            await api.put(`/api/admin/phases/${id}`, data, {
                 headers: {"Content-Type" : "application/json"},}
             );
             navigate("/dashboard/phase")

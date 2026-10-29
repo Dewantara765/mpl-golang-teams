@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { api } from "../../../services/api";
+import  api  from "../../../services/axios";
 export default function EditMatch() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -78,7 +78,7 @@ export default function EditMatch() {
             best_of
         };
         try {
-            await api.put(`/matches/${id}`, data, {
+            await api.put(`/api/admin/matches/${id}`, data, {
                 headers: {"Content-Type" : "application/json"},
             });
             navigate("/dashboard/match");

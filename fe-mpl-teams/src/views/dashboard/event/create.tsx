@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import { api } from "../../../services/api";
+import  api  from "../../../services/axios";
 import { useNavigate } from "react-router-dom";
 
 export default function EventCreate() {
@@ -32,7 +32,7 @@ export default function EventCreate() {
         event.preventDefault()
         const data = {name, type, phase_id}
         try {
-            await api.post("/events", data, {
+            await api.post("/api/admin/events", data, {
                 headers: {"Content-Type" : "application/json"},}
             );
             navigate("/dashboard/event")

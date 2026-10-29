@@ -1,4 +1,4 @@
-import { api } from "../../../services/api"
+import  api  from "../../../services/axios"
 import { useEffect, useState } from "react"
 export default function DashboardStandingIndex(){
     const [standings, setStandings] = useState<Standing[]>([])

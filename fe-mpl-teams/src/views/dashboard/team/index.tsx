@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import {api } from "../../../services/api"
+import api from "../../../services/axios"
 import { useEffect, useState } from "react"
 
 export default function Team() {
@@ -21,7 +21,7 @@ export default function Team() {
     const handleDelete = async (id: number) => {
         if (window.confirm("Are you sure you want to delete this team?")) {
             try {
-                await api.delete(`/teams/${id}`)
+                await api.delete(`/api/admin/teams/${id}`)
                 setTeams(teams.filter((team: any) => team.id !== id) || null)
             } catch (error) {
                 console.error("Error deleting team:", error)

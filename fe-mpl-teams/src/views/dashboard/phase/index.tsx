@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react'
-import { api } from '../../../services/api'
+import api from '../../../services/axios'
 import { Link } from 'react-router-dom';
 export default function DashboardPhaseIndex(){
     const [phases, setPhases] = useState<Phase[]>([]);
@@ -30,9 +30,9 @@ export default function DashboardPhaseIndex(){
     const handleDelete = async (id: number) => {
         if (window.confirm("Are you sure you want to delete this phase?")) {
             try {
-                await api.delete(`/phases/${id}`);
+                await api.delete(`/api/admin/phases/${id}`);
                 setPhases(phases.filter((phase: any) => phase.id !== id) || null);
-            } catch (error) {
+            } catch (error : any) {
                 console.error("Error deleting phase:", error);
                 alert(error.response?.data?.message ?? "Failed to delete phase.");
             }

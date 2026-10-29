@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { api } from "../../../services/api"
+import  api  from "../../../services/axios"
 import { useNavigate } from "react-router-dom";
 export default function HeroCreate(){
     const [name, setName] = useState<string>("");
@@ -28,7 +28,7 @@ export default function HeroCreate(){
         }
 
         try {
-            await api.post("/heroes", formData, {
+            await api.post("/api/admin/heroes", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },

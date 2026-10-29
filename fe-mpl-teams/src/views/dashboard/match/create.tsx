@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../../services/api";
+import  api  from "../../../services/axios";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
 export default function CreateMatch() {
@@ -76,7 +76,7 @@ export default function CreateMatch() {
             best_of,
         };
         try {
-            await api.post("/matches", data);
+            await api.post("/api/admin/matches", data);
             navigate("/dashboard/match");
         } catch (error : any) {
             console.error("Error creating match:", error);
