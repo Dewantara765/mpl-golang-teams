@@ -1,11 +1,14 @@
 package main
 
 import (
+	"log"
 	"mpl-team/config"
 	"mpl-team/controllers"
 	"mpl-team/repositories"
 	"mpl-team/routes"
 	"mpl-team/services"
+
+	"github.com/joho/godotenv"
 
 	"time"
 
@@ -14,6 +17,9 @@ import (
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("File .env tidak ditemukan")
+	}
 	// Initialize router
 	r := gin.Default()
 
@@ -74,7 +80,11 @@ func main() {
 		heroDraftService,
 	)
 
-	routes.SetupRoutes(r, matchController, gameController, heroDraftController)
+	authController := controllers.NewAuthController(
+		config.DB,
+	)
+
+	routes.SetupRoutes(r, matchController, gameController, heroDraftController, authController)
 	r.Static("/uploads", "./uploads")
 
 	// Start application server on port 8080

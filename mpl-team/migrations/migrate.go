@@ -18,5 +18,6 @@ func main() {
 		&models.Game{},
 		&models.Standing{},
 		&models.HeroDraft{},
+		&models.User{},
 	)
 }
