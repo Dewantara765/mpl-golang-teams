@@ -7,6 +7,8 @@ import (
 
 	"mpl-team/models"
 	"mpl-team/repositories"
+
+	"gorm.io/gorm"
 )
 
 type MatchService struct {
@@ -94,8 +96,8 @@ func (s *MatchService) CreateMatch(
 
 	// 8. Create model
 	match := &models.Match{
-		HomeTeamID: input.HomeTeamID,
-		AwayTeamID: input.AwayTeamID,
+		HomeTeamID: &input.HomeTeamID,
+		AwayTeamID: &input.AwayTeamID,
 		EventID:    input.EventID,
 		Date:       input.Date,
 		Time:       input.Time,
@@ -234,9 +236,9 @@ func (s *MatchService) CompleteMatch(matchID uint) error {
 
 	for _, game := range match.Games {
 		switch game.WinnerTeamID {
-		case match.HomeTeamID:
+		case *match.HomeTeamID:
 			homeScore++
-		case match.AwayTeamID:
+		case *match.AwayTeamID:
 			awayScore++
 		}
 	}
@@ -258,8 +260,8 @@ func (s *MatchService) CompleteMatch(matchID uint) error {
 
 		if err := s.StandingRepository.UpdateAfterMatch(
 			match.Event.PhaseID,
-			match.HomeTeamID,
-			match.AwayTeamID,
+			*match.HomeTeamID,
+			*match.AwayTeamID,
 			homeScore,
 			awayScore,
 		); err != nil {
@@ -291,9 +293,101 @@ func (s *MatchService) UpdateStandingFromCompletedMatch(matchID uint) error {
 
 	return s.StandingRepository.UpdateAfterMatch(
 		match.Event.PhaseID,
-		match.HomeTeamID,
-		match.AwayTeamID,
+		*match.HomeTeamID,
+		*match.AwayTeamID,
 		*match.HomeScore,
 		*match.AwayScore,
 	)
+}
+
+func (s *MatchService) FillNextMatchSlot(
+	tx *gorm.DB,
+	nextMatchID uint,
+	teamID uint,
+	slot string,
+) error {
+	var nextMatch models.Match
+
+	if err := tx.First(&nextMatch, nextMatchID).Error; err != nil {
+		return err
+	}
+
+	switch slot {
+	case "home":
+		if nextMatch.HomeTeamID != nil {
+			return errors.New("home slot is already occupied")
+		}
+
+		return tx.Model(&nextMatch).
+			Update("home_team_id", teamID).Error
+
+	case "away":
+		if nextMatch.AwayTeamID != nil {
+			return errors.New("away slot is already occupied")
+		}
+
+		return tx.Model(&nextMatch).
+			Update("away_team_id", teamID).Error
+
+	default:
+		return errors.New("invalid next match slot")
+	}
+}
+
+func (s *MatchService) AdvanceTeams(
+	tx *gorm.DB,
+	match *models.Match,
+) error {
+	if match.HomeTeamID == nil || match.AwayTeamID == nil {
+		return errors.New("both teams are required")
+	}
+
+	if match.HomeScore == nil || match.AwayScore == nil {
+		return errors.New("match scores are required")
+	}
+
+	if *match.HomeScore == *match.AwayScore {
+		return errors.New("match cannot end in a draw")
+	}
+
+	winnerID := *match.HomeTeamID
+	loserID := *match.AwayTeamID
+
+	if *match.AwayScore > *match.HomeScore {
+		winnerID, loserID = loserID, winnerID
+	}
+
+	// Kirim pemenang ke match berikutnya.
+	if match.WinnerNextMatchID != nil {
+		if match.WinnerNextSlot == nil {
+			return errors.New("winner next slot is required")
+		}
+
+		if err := s.FillNextMatchSlot(
+			tx,
+			*match.WinnerNextMatchID,
+			winnerID,
+			*match.WinnerNextSlot,
+		); err != nil {
+			return err
+		}
+	}
+
+	// Kirim tim yang kalah jika masih memiliki jalur bracket.
+	if match.LoserNextMatchID != nil {
+		if match.LoserNextSlot == nil {
+			return errors.New("loser next slot is required")
+		}
+
+		if err := s.FillNextMatchSlot(
+			tx,
+			*match.LoserNextMatchID,
+			loserID,
+			*match.LoserNextSlot,
+		); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

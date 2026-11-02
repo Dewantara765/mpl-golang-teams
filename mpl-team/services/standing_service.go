@@ -48,7 +48,7 @@ func (s *StandingService) UpdateFromCompletedMatch(
 
 	homeStanding, err := s.StandingRepository.FindByTeamAndPhase(
 		tx,
-		match.HomeTeamID,
+		*match.HomeTeamID,
 		match.Event.PhaseID,
 	)
 
@@ -58,7 +58,7 @@ func (s *StandingService) UpdateFromCompletedMatch(
 
 	awayStanding, err := s.StandingRepository.FindByTeamAndPhase(
 		tx,
-		match.AwayTeamID,
+		*match.AwayTeamID,
 		match.Event.PhaseID,
 	)
 

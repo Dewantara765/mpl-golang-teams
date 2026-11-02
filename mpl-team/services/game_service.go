@@ -15,6 +15,7 @@ type GameService struct {
 	MatchRepository *repositories.MatchRepository
 	TeamRepository  *repositories.TeamRepository
 	StandingService *StandingService
+	MatchService    *MatchService
 }
 
 func NewGameService(
@@ -96,12 +97,17 @@ func (s *GameService) CreateGame(
 		// Validate Winner
 		// =========================
 
-		if input.WinnerTeamID != match.HomeTeamID &&
-			input.WinnerTeamID != match.AwayTeamID {
+		if input.WinnerTeamID != *match.HomeTeamID &&
+			input.WinnerTeamID != *match.AwayTeamID {
 
 			return fmt.Errorf(
 				"winner team must be one of the teams in this match",
 			)
+		}
+
+		if input.FirstPickTeamID != *match.HomeTeamID &&
+			input.FirstPickTeamID != *match.AwayTeamID {
+			return fmt.Errorf("first pick team must be one of the teams in this match")
 		}
 
 		// =========================
@@ -199,22 +205,22 @@ func (s *GameService) CreateGame(
 
 		for _, g := range games {
 
-			if g.WinnerTeamID == match.HomeTeamID {
+			if g.WinnerTeamID == *match.HomeTeamID {
 				homeScore++
 			}
 
-			if g.WinnerTeamID == match.AwayTeamID {
+			if g.WinnerTeamID == *match.AwayTeamID {
 				awayScore++
 			}
 		}
 
 		// Tambahkan game baru
 
-		if input.WinnerTeamID == match.HomeTeamID {
+		if input.WinnerTeamID == *match.HomeTeamID {
 			homeScore++
 		}
 
-		if input.WinnerTeamID == match.AwayTeamID {
+		if input.WinnerTeamID == *match.AwayTeamID {
 			awayScore++
 		}
 
@@ -252,21 +258,19 @@ func (s *GameService) CreateGame(
 			); err != nil {
 				return err
 			}
+
+			if err := s.MatchService.AdvanceTeams(
+				tx,
+				match,
+			); err != nil {
+				return err
+			}
+
 		}
 
 		// =========================
 		// Update Match
 		// =========================
-
-		if err := s.MatchRepository.UpdateScoreAndStatus(
-			tx,
-			match,
-			homeScore,
-			awayScore,
-			status,
-		); err != nil {
-			return err
-		}
 
 		return nil
 	})
@@ -299,8 +303,8 @@ func (s *GameService) UpdateFirstPick(
 	}
 
 	// Pastikan team adalah salah satu team yang bermain
-	if teamID != game.Match.HomeTeamID &&
-		teamID != game.Match.AwayTeamID {
+	if teamID != *game.Match.HomeTeamID &&
+		teamID != *game.Match.AwayTeamID {
 		return errors.New(
 			"first pick team must be one of the match teams",
 		)
