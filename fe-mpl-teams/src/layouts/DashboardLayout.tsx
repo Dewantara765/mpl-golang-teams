@@ -9,7 +9,7 @@ export default function DashboardLayout(){
         role: "admin" | "user";
     }
 
-    const storedUser = sessionStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
 
     const user: User | null = storedUser
     ? JSON.parse(storedUser)
@@ -19,8 +19,8 @@ export default function DashboardLayout(){
     const navigate = useNavigate();
 
     const logout = () => {
-        sessionStorage.removeItem("token");
-        sessionStorage.removeItem("user");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
 
         navigate("/dashboard/login", { replace: true });
     };

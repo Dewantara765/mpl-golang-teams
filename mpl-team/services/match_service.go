@@ -27,8 +27,8 @@ func NewMatchService(
 }
 
 type CreateMatchInput struct {
-	HomeTeamID uint
-	AwayTeamID uint
+	HomeTeamID *uint
+	AwayTeamID *uint
 	EventID    uint
 	BestOf     *int
 	Date       string
@@ -40,7 +40,10 @@ func (s *MatchService) CreateMatch(
 ) (*models.Match, error) {
 
 	// 1. Validate home & away
-	if input.HomeTeamID == input.AwayTeamID {
+	if input.HomeTeamID != nil &&
+		input.AwayTeamID != nil &&
+		*input.HomeTeamID == *input.AwayTeamID {
+
 		return nil, apperrors.ValidationErrors{
 			"away_team_id": "Home team and away team cannot be the same",
 		}
@@ -73,19 +76,19 @@ func (s *MatchService) CreateMatch(
 		}
 	}
 
-	// 5. Check home team
-	if _, err := s.MatchRepository.FindTeamByID(input.HomeTeamID); err != nil {
-		return nil, apperrors.ValidationErrors{
-			"home_team_id": "home team not found",
-		}
-	}
+	// // 5. Check home team
+	// if _, err := s.MatchRepository.FindTeamByID(input.HomeTeamID); err != nil {
+	// 	return nil, apperrors.ValidationErrors{
+	// 		"home_team_id": "home team not found",
+	// 	}
+	// }
 
-	// 6. Check away team
-	if _, err := s.MatchRepository.FindTeamByID(input.AwayTeamID); err != nil {
-		return nil, apperrors.ValidationErrors{
-			"away_team_id": "away team not found",
-		}
-	}
+	// // 6. Check away team
+	// if _, err := s.MatchRepository.FindTeamByID(input.AwayTeamID); err != nil {
+	// 	return nil, apperrors.ValidationErrors{
+	// 		"away_team_id": "away team not found",
+	// 	}
+	// }
 
 	// 7. Check event
 	if _, err := s.MatchRepository.FindEventByID(input.EventID); err != nil {
@@ -96,8 +99,8 @@ func (s *MatchService) CreateMatch(
 
 	// 8. Create model
 	match := &models.Match{
-		HomeTeamID: &input.HomeTeamID,
-		AwayTeamID: &input.AwayTeamID,
+		HomeTeamID: input.HomeTeamID,
+		AwayTeamID: input.AwayTeamID,
 		EventID:    input.EventID,
 		Date:       input.Date,
 		Time:       input.Time,
@@ -169,6 +172,8 @@ type UpdateMatchInput struct {
 	Time              *string
 	WinnerNextMatchID *uint
 	LoserNextMatchID  *uint
+	WinnerNextSlot    *string
+	LoserNextSlot     *string
 }
 
 func (s *MatchService) UpdateMatch(id uint,
@@ -210,6 +215,24 @@ func (s *MatchService) UpdateMatch(id uint,
 		return nil, apperrors.ValidationErrors{
 			"loser_next_match_id": "Winner dan Loser next match tidak boleh sama",
 		}
+	}
+
+	if input.WinnerNextSlot != nil {
+		if *input.WinnerNextSlot != "home" && *input.WinnerNextSlot != "away" {
+			return nil, apperrors.ValidationErrors{
+				"winner_next_slot": "Winner next slot harus home atau away",
+			}
+		}
+		match.WinnerNextSlot = input.WinnerNextSlot
+	}
+
+	if input.LoserNextSlot != nil {
+		if *input.LoserNextSlot != "home" && *input.LoserNextSlot != "away" {
+			return nil, apperrors.ValidationErrors{
+				"loser_next_slot": "Loser next slot harus home atau away",
+			}
+		}
+		match.LoserNextSlot = input.LoserNextSlot
 	}
 
 	if err := s.MatchRepository.Update(match); err != nil {

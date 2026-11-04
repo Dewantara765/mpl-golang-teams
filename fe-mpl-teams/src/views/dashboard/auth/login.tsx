@@ -41,8 +41,8 @@ const submit : FormEventHandler<HTMLFormElement>= async(e) => {
             
             if(data.token) {
                 setToken(data.token);
-                sessionStorage.setItem("token", data.token);
-                sessionStorage.setItem("user", JSON.stringify(data.user));
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(data.user));
                 navigate("/dashboard/team");
             }
             

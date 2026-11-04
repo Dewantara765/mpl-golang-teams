@@ -25,13 +25,13 @@ export default function DashboardMatchIndex(){
     interface Match {
         id: number,
         home_team: {
-            short_name: string,
+            short_name: string | null,
         },
         away_team: {
-            short_name: string,
+            short_name: string | null,
         },
-        home_score: number,
-        away_score: number,
+        home_score: number | null,
+        away_score: number | null,
         date: string,
         time: string,
         best_of: number,
@@ -108,7 +108,7 @@ export default function DashboardMatchIndex(){
                         {matches.map((match, index) => (
                             <tr key={match.id}>
                                 <td className="table-cell">{index + 1}</td>
-                                <td className="table-cell">{match.home_team.short_name} {match.home_score}-{match.away_score} {match.away_team.short_name}</td>
+                                <td className="table-cell">{!match.home_team?.short_name ? "TBD" : match.home_team.short_name} {match.home_score ?? ""}-{match.away_score ?? ""} {!match.away_team?.short_name ? "TBD" : match.away_team.short_name}</td>
                                 <td className="table-cell">{match.best_of}</td>
                                 <td className="table-cell">{formatDate(match.date)}</td>
                                 <td className="table-cell">{formatTime(match.time)}</td>

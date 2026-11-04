@@ -141,8 +141,8 @@ func (mc *MatchController) CreateMatch(c *gin.Context) {
 
 	// Convert HTTP input → service input
 	matchInput := services.CreateMatchInput{
-		HomeTeamID: *input.HomeTeamID,
-		AwayTeamID: *input.AwayTeamID,
+		HomeTeamID: input.HomeTeamID,
+		AwayTeamID: input.AwayTeamID,
 		EventID:    input.EventID,
 		BestOf:     input.BestOf,
 		Date:       input.Date,
@@ -182,9 +182,13 @@ func (mc *MatchController) UpdateMatch(c *gin.Context) {
 	}
 
 	var input struct {
-		Date   *string `json:"date"`
-		Time   *string `json:"time"`
-		BestOf *int    `json:"best_of"`
+		Date              *string `json:"date"`
+		Time              *string `json:"time"`
+		BestOf            *int    `json:"best_of"`
+		WinnerNextMatchID *uint   `json:"winner_next_match_id"`
+		LoserNextMatchID  *uint   `json:"loser_next_match_id"`
+		WinnerNextSlot    *string `json:"winner_next_slot"`
+		LoserNextSlot     *string `json:"loser_next_slot"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -195,9 +199,13 @@ func (mc *MatchController) UpdateMatch(c *gin.Context) {
 	}
 
 	updateInput := services.UpdateMatchInput{
-		Date:   input.Date,
-		Time:   input.Time,
-		BestOf: input.BestOf,
+		Date:              input.Date,
+		Time:              input.Time,
+		BestOf:            input.BestOf,
+		WinnerNextMatchID: input.WinnerNextMatchID,
+		LoserNextMatchID:  input.LoserNextMatchID,
+		WinnerNextSlot:    input.WinnerNextSlot,
+		LoserNextSlot:     input.LoserNextSlot,
 	}
 
 	match, err := mc.MatchService.UpdateMatch(

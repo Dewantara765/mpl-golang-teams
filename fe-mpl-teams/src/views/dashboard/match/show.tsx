@@ -93,8 +93,13 @@ export default function DashboardMatchShow(){
                 setDate(formatDate(matchData.date))
                 setTime(formatTime(matchData.time))
                 setGames(matchData.games)
-                
-                
+
+                if (matchData.home_team == null) {
+                    setMatch(prevMatch => prevMatch ? { ...prevMatch, home_team: { name: "Home Team", short_name: "Home Team", logo: "uploads/teamlogo.jpg" } } : null);
+                }
+                if (matchData.away_team == null) {
+                    setMatch(prevMatch => prevMatch ? { ...prevMatch, away_team: { name: "Away Team", short_name: "Away Team", logo: "uploads/teamlogo.jpg" } } : null);
+                }
             }catch (error : any) {
                 console.error("Error fetching matches:", error);
             }
@@ -123,9 +128,9 @@ export default function DashboardMatchShow(){
                         <th className="table-cell">Hasil pertandingan</th>
                         <td className="table-cell">
                             <div className="flex gap-2">
-                                <img src={`http://localhost:8080/${match?.home_team.logo}`} alt={match?.home_team.name} className="w-10 object-contain"/>
-                                <div>{match?.home_team.name} <b>{match?.home_score}</b>-<b>{match?.away_score}</b> {match?.away_team.name} </div>
-                                <img src={`http://localhost:8080/${match?.away_team.logo}`} alt={match?.away_team.name} className="w-10 object-contain"/>
+                                <img src={`http://localhost:8080/${match?.home_team.logo}`} alt={!match?.home_team.name ? 'Home Team' : match?.home_team.name} className="w-10 object-contain"/>
+                                <div>{!match.home_team.name ? 'Home Team' : match.home_team.name} <b>{match?.home_score}</b>-<b>{match?.away_score}</b> {!match.away_team.name ? 'Away Team' : match?.away_team.name} </div>
+                                <img src={`http://localhost:8080/${match?.away_team.logo}`} alt={!match?.away_team.name ? 'Away Team' : match?.away_team.name} className="w-10 object-contain"/>
                             </div>
                             <div className="text-center">
                                 (BO{match?.best_of})

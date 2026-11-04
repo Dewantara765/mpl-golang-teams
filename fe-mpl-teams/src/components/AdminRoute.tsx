@@ -12,8 +12,8 @@ interface StoredUser {
 export default function AdminRoute() {
     const location = useLocation();
 
-    const token = sessionStorage.getItem("token");
-    const storedUser = sessionStorage.getItem("user");
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
 
     if (!token || !storedUser) {
     return (
@@ -30,8 +30,8 @@ export default function AdminRoute() {
     try {
         user = JSON.parse(storedUser);
     } catch {
-        sessionStorage.removeItem("token");
-        sessionStorage.removeItem("user");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
 
         return <Navigate to="/dashboard/login" replace />;
     }

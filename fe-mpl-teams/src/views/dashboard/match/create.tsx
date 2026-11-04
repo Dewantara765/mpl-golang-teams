@@ -6,8 +6,8 @@ import AsyncSelect from "react-select/async";
 export default function CreateMatch() {
     const [teams, setTeams] = useState<Team[]>([]);
     const [events, setEvents] = useState<Event[]>([]);
-    const [home_team_id, setHomeTeamId] = useState<number>(0);
-    const [away_team_id, setAwayTeamId] = useState<number>(0);
+    const [home_team_id, setHomeTeamId] = useState<number | null>(null);
+    const [away_team_id, setAwayTeamId] = useState<number | null>(null);
     const [event_id, setEventId] = useState<number>(0);
     const [selectedEvent, setSelectedEvent] = useState<EventOption | null>(null);
     // const [home_score, setHomeScore] = useState<number >(0);

@@ -85,8 +85,19 @@ export default function PhaseMatches(){
                 const response = await api.get(
                     `/tournaments/${slug}/phases/${phaseSlug}`
                 );
+                const phaseData = response.data;
+                const eventsData = phaseData.events.map((event: any) => ({
+                    ...event,
+                    matches: event.matches.map((match: any) => ({
+                        ...match,
+                        home_team: match.home_team || { name: "Home Team", short_name: "Home Team", logo: "uploads/teamlogo.jpg" },
+                        away_team: match.away_team || { name: "Away Team", short_name: "Away Team", logo: "uploads/teamlogo.jpg" },
+                    }))
+                }));
+
+                setPhase({ ...phaseData, events: eventsData });   
+
                 
-                setPhase(response.data);
             } catch (error) {
                 console.error(error);
             } finally {
@@ -106,75 +117,6 @@ export default function PhaseMatches(){
         <div className="p-4">
             
             <div className="header-title">List Match</div>
-        {phase.name === "Playoff" &&
-            <div className="grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 xl:grid-cols-3">
-            {/* Baris atas */}
-            <section className="xl:col-start-1 xl:row-start-1">
-                <h2 className="mb-5 text-lg font-semibold">Play-in</h2>
-                
-            {phase.events
-            .filter((event) => event.name === "Play-in")
-            .map((event) => (
-                <div
-                key={event.id}
-                className="space-y-4"
-                >
-                {event.matches.map((match: any) => (
-                    <div key={match.id} className="overflow-hidden border border-gray-400">
-                    <div className="flex items-center justify-between p-3">
-                        <span>{match.home_team?.short_name ?? "TBD"}</span>
-                        <span>{match.home_score ?? "-"}</span>
-                    </div>
-
-                    <div className="border-t border-gray-300" />
-
-                    <div className="flex items-center justify-between p-3">
-                        <span>{match.away_team?.short_name ?? "TBD"}</span>
-                        <span>{match.away_score ?? "-"}</span>
-                    </div>
-                    </div>
-                ))}
-                </div>
-            ))}
-
-            </section>
-
-            <section className="xl:col-start-2 xl:row-start-1">
-                <h2 className="mb-5 text-lg font-semibold">
-                Semifinal Upper Bracket
-                </h2>
-                {/* Match Semifinal UB */}
-            </section>
-
-            <section className="xl:col-start-3 xl:row-start-1">
-                <h2 className="mb-5 text-lg font-semibold">
-                Final Upper Bracket
-                </h2>
-                {/* Match Final UB */}
-            </section>
-
-            {/* Baris bawah */}
-            <section className="xl:col-start-2 xl:row-start-2">
-                <h2 className="mb-5 text-lg font-semibold">
-                Semifinal Lower Bracket
-                </h2>
-                {/* Match Semifinal LB */}
-            </section>
-
-            <section className="xl:col-start-3 xl:row-start-2">
-                <h2 className="mb-5 text-lg font-semibold">
-                Final Lower Bracket
-                </h2>
-                {/* Match Final LB */}
-            </section>
-
-            {/* Grand Final */}
-            <section className="xl:col-start-3 xl:row-start-3">
-                <h2 className="mb-5 text-lg font-semibold">Grand Final</h2>
-                {/* Match Grand Final */}
-            </section>
-            </div>
-        }
             
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 
