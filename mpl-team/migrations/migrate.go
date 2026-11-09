@@ -19,5 +19,6 @@ func main() {
 		&models.Standing{},
 		&models.HeroDraft{},
 		&models.User{},
+		&models.Region{},
 	)
 }

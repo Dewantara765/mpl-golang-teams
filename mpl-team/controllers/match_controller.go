@@ -4,6 +4,7 @@ import (
 	"errors"
 	"mpl-team/config"
 	apperrors "mpl-team/errors"
+	"mpl-team/helpers"
 	"mpl-team/models"
 	"mpl-team/services"
 	"net/http"
@@ -30,33 +31,15 @@ func NewMatchController(
 
 func (mc *MatchController) FindMatches(c *gin.Context) {
 
-	page, err := strconv.Atoi(
-		c.DefaultQuery("page", "1"),
-	)
-
+	pagination, err := helpers.GetPagination(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid page",
+			"error": err.Error(),
 		})
 		return
 	}
 
-	pageSize, err := strconv.Atoi(
-		c.DefaultQuery("pageSize", "7"),
-	)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid pageSize",
-		})
-		return
-	}
-
-	result, err := mc.MatchService.FindMatches(
-		page,
-		pageSize,
-	)
-
+	result, err := mc.MatchService.FindMatches(pagination)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to retrieve matches",
@@ -66,7 +49,6 @@ func (mc *MatchController) FindMatches(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
-
 func (mc *MatchController) FindMatchByID(c *gin.Context) {
 
 	id, err := strconv.ParseUint(

@@ -7,8 +7,8 @@ export default function DashboardEventIndex() {
         const [page, setPage] = useState(1);
         const [search, setSearch] = useState<string>("")
         const [debouncedSearch, setDebouncedSearch] = useState("");
-        const [total_pages, setTotalPages] = useState(0);
-        const pages = getPaginationPages(page, total_pages);
+        const [totalPage, setTotalPage] = useState(0);
+        const pages = getPaginationPages(page, totalPage);
         const [sort, setSort] = useState<string>("id");
         const [order, setOrder] = useState<string>("asc");
     const [searchParams] = useSearchParams();
@@ -49,7 +49,7 @@ export default function DashboardEventIndex() {
                 setSort(sort)
                 setOrder(order)
                 setEvents(response.data.data);
-                setTotalPages(response.data.total_pages)
+                setTotalPage(response.data.totalPage)
             } catch (error) {
                 console.error("Error fetching events:", error);
             }
@@ -113,7 +113,7 @@ export default function DashboardEventIndex() {
                         )}
                     </tbody>
                 </table>
-                 <div className="flex items-center gap-2 mt-6">
+                <div className="flex items-center gap-2 mt-6">
 
                     {/* Previous */}
                     {page !== 1 ?
@@ -158,7 +158,7 @@ export default function DashboardEventIndex() {
                     })}
 
                     {/* Next */}
-                    {page !== total_pages ?
+                    {page !== totalPage ?
                     <Link to={`/dashboard/event?page=${page + 1}&order=desc`}>
                         <button
                             className="px-3 py-2 border rounded"

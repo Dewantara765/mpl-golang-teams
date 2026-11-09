@@ -9,8 +9,17 @@ export default function TeamEdit() {
     const [name, setName] = useState<string>("")
     const [short_name, setShortName] = useState<string>("")
     const [logo, setLogo] = useState<File | null>(null)
+    const [regions, setRegions] = useState<Region[]>([])
+    const [region_id, setRegionId] = useState<number | null>(null)
     const [preview, setPreview] = useState<string | null>(null)
     const [errors, setErrors] = useState<{ name?: string; short_name?: string }>({})
+
+    interface Region {
+        id: number;
+        name: string;
+        code: string;
+        logo: string;
+    }
 
     const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -29,13 +38,25 @@ export default function TeamEdit() {
                 setShortName(response.data.data.short_name)
                 setLogo(`http://localhost:8080/${response.data.data.logo}`)
                 setPreview(`http://localhost:8080/${response.data.data.logo}`)
+                setRegionId(response.data.data.region_id)
             } catch (error : any) {
                 if (error.response && error.response.data && error.response.data.errors) {
                 setErrors(error.response.data.errors)
             }
             }
         }
+
+        const fetchRegions = async () => {
+            try {
+                const response = await api.get("/regions")
+                setRegions(response.data.data)
+            } catch (error : any) {
+                console.error("Error fetching regions:", error)
+            }
+        }
+
         fetchTeam()
+        fetchRegions()
     }, [id])
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -43,6 +64,7 @@ export default function TeamEdit() {
         const formData = new FormData()
         formData.append("name", name)
         formData.append("short_name", short_name)
+        formData.append("region_id", region_id?.toString() || "")
         if (logo) {
             formData.append("logo", logo)
         }
@@ -77,6 +99,17 @@ export default function TeamEdit() {
                     <input value={short_name} type="text" id="shortName" className="mt-1 block w-50 input-field" 
                     onChange={(e) => setShortName(e.target.value)} />
                     {errors.short_name && <p className="text-red-500 text-sm">{errors.short_name}</p>}
+                </div>
+                <div className="flex gap-2 items-center">
+                    <label htmlFor="region" className="block w-40 text-md font-medium text-gray-700">Region</label>
+                    <select name="region" id="region" value={region_id} className="w-80 border border-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    onChange={(e) => setRegionId(Number(e.target.value))}>
+                        <option value="">Pilih Region..</option>
+                    {regions.map((region) => (
+                        <option key={region.id} value={region.id}>{region.name}</option>
+                    ))}
+                    
+                    </select>
                 </div>
                 <div className="flex gap-2 items-center">
                     <label htmlFor="logo" className="block input-label">Logo</label>

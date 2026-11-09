@@ -2,29 +2,114 @@ package main
 
 import (
 	"log"
+	"time"
+
 	"mpl-team/config"
 	"mpl-team/controllers"
 	"mpl-team/repositories"
 	"mpl-team/routes"
 	"mpl-team/services"
 
-	"github.com/joho/godotenv"
-
-	"time"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// =========================
+	// Configuration
+	// =========================
+
 	if err := godotenv.Load(); err != nil {
 		log.Println("File .env tidak ditemukan")
 	}
-	// Initialize router
+
+	// =========================
+	// Database
+	// =========================
+
+	config.ConnectDatabase()
+
+	db := config.DB
+
+	// =========================
+	// Repositories
+	// =========================
+
+	standingRepository := repositories.NewStandingRepository(db)
+	heroDraftRepository := repositories.NewHeroDraftRepository()
+	matchRepository := repositories.NewMatchRepository(db)
+	teamRepository := repositories.NewTeamRepository(db)
+	gameRepository := repositories.NewGameRepository(db)
+	eventRepository := repositories.NewEventRepository(db)
+	regionRepository := repositories.NewRegionRepository(db)
+
+	// =========================
+	// Services
+	// =========================
+
+	standingService := services.NewStandingService(
+		standingRepository,
+	)
+
+	heroDraftService := services.NewHeroDraftService(
+		db,
+		heroDraftRepository,
+	)
+
+	teamService := services.NewTeamService(
+		teamRepository,
+	)
+
+	eventService := services.NewEventService(
+		eventRepository,
+	)
+
+	matchService := services.NewMatchService(
+		matchRepository,
+		standingRepository,
+	)
+
+	gameService := services.NewGameService(
+		db,
+		gameRepository,
+		matchRepository,
+		teamRepository,
+		standingService,
+	)
+
+	regionService := services.NewRegionService(
+		regionRepository,
+	)
+
+	// =========================
+	// Controllers
+	// =========================
+
+	matchController := controllers.NewMatchController(matchService)
+
+	gameController := controllers.NewGameController(gameService)
+
+	heroDraftController := controllers.NewHeroDraftController(
+		heroDraftService,
+	)
+
+	authController := controllers.NewAuthController(db)
+
+	teamController := controllers.NewTeamController(teamService)
+
+	eventController := controllers.NewEventController(eventService)
+
+	regionController := controllers.NewRegionController(regionService)
+
+	// =========================
+	// Router
+	// =========================
+
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // React
+		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -32,61 +117,24 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// Connect database and run migration
-	config.ConnectDatabase()
-
-	standingRepository := repositories.NewStandingRepository(config.DB)
-
-	standingService := services.NewStandingService(
-		standingRepository,
+	routes.SetupRoutes(
+		r,
+		matchController,
+		gameController,
+		heroDraftController,
+		authController,
+		teamController,
+		eventController,
+		regionController,
 	)
 
-	heroDraftRepo := repositories.NewHeroDraftRepository()
-
-	heroDraftService := services.NewHeroDraftService(
-		config.DB,
-		heroDraftRepo,
-	)
-
-	// Repository
-	matchRepository := repositories.NewMatchRepository(config.DB)
-	teamRepository := repositories.NewTeamRepository(config.DB)
-	gameRepository := repositories.NewGameRepository(config.DB)
-
-	gameService := services.NewGameService(
-		config.DB,
-		gameRepository,
-		matchRepository,
-		teamRepository,
-		standingService,
-	)
-
-	// Service
-	matchService := services.NewMatchService(
-		matchRepository,
-		standingRepository,
-	)
-
-	// Controller
-	matchController := controllers.NewMatchController(
-		matchService,
-	)
-
-	gameController := controllers.NewGameController(
-		gameService,
-	)
-
-	heroDraftController := controllers.NewHeroDraftController(
-		heroDraftService,
-	)
-
-	authController := controllers.NewAuthController(
-		config.DB,
-	)
-
-	routes.SetupRoutes(r, matchController, gameController, heroDraftController, authController)
 	r.Static("/uploads", "./uploads")
 
-	// Start application server on port 8080
-	r.Run(":8080")
+	// =========================
+	// Start Server
+	// =========================
+
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal("Gagal menjalankan server:", err)
+	}
 }

@@ -13,6 +13,9 @@ func SetupRoutes(
 	gameController *controllers.GameController,
 	heroDraftController *controllers.HeroDraftController,
 	authController *controllers.AuthController,
+	teamController *controllers.TeamController,
+	eventController *controllers.EventController,
+	regionController *controllers.RegionController,
 ) {
 
 	auth := router.Group("/auth")
@@ -27,8 +30,8 @@ func SetupRoutes(
 		middleware.AdminMiddleware(),
 	)
 
-	admin.POST("/teams", controllers.CreateTeam)
-	admin.PUT("/teams/:id", controllers.UpdateTeam)
+	admin.POST("/teams", teamController.CreateTeam)
+	admin.PUT("/teams/:id", teamController.UpdateTeam)
 	admin.DELETE("/teams/:id", controllers.DeleteTeam)
 
 	admin.POST("/tournaments", controllers.CreateTournament)
@@ -39,8 +42,8 @@ func SetupRoutes(
 	admin.PUT("/phases/:id", controllers.UpdatePhase)
 	admin.DELETE("/phases/:id", controllers.DeletePhase)
 
-	admin.POST("/events", controllers.CreateEvent)
-	admin.PUT("/events/:id", controllers.UpdateEvent)
+	admin.POST("/events", eventController.CreateEvent)
+	admin.PUT("/events/:id", eventController.UpdateEvent)
 	admin.DELETE("/events/:id", controllers.DeleteEvent)
 
 	admin.POST("/matches", matchController.CreateMatch)
@@ -67,10 +70,13 @@ func SetupRoutes(
 		heroDraftController.Delete,
 	)
 
+	admin.POST("/regions", regionController.CreateRegion)
+	admin.PUT("/regions/:id", regionController.UpdateRegion)
+
 	team := router.Group("/teams")
 	{
-		team.GET("", controllers.FindTeams)
-		team.GET("/:id", controllers.FindTeamByID)
+		team.GET("", teamController.FindTeams)
+		team.GET("/:id", teamController.FindTeamByID)
 
 	}
 
@@ -92,8 +98,8 @@ func SetupRoutes(
 
 	event := router.Group("/events")
 	{
-		event.GET("", controllers.FindEvents)
-		event.GET("/:id", controllers.FindEventByID)
+		event.GET("", eventController.FindEvents)
+		event.GET("/:id", eventController.FindEventByID)
 
 	}
 
@@ -132,6 +138,13 @@ func SetupRoutes(
 			"/games/:gameID",
 			heroDraftController.FindByGameID,
 		)
+
+	}
+
+	region := router.Group("/regions")
+	{
+		region.GET("", regionController.FindRegions)
+		region.GET("/:id", regionController.FindRegionByID)
 
 	}
 }

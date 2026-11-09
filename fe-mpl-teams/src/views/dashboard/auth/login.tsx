@@ -57,16 +57,18 @@ const submit : FormEventHandler<HTMLFormElement>= async(e) => {
         }
     }
     return (
-        <div className="w-xl bg-sky-400">
+        <div className="w-xl bg-gray-400">
             <p className="text-2xl font-bold text-center">Login</p>
-            <form onSubmit={submit} className="flex flex-col justify-center m-4">
-                <div>   
-                <label className="input-label">Login</label>
-                    <input type="text" className="input-field" onChange={(e) => setLogin(e.target.value)}/>
-                </div>
-                <div>   
-                    <label className="input-label">Password</label>
-                    <input type="password" className="input-field" onChange={(e) => setPassword(e.target.value)}/>
+            <form onSubmit={submit} className="flex flex-col m-4">
+                <div className="mb-4">
+                    <div>   
+                    <label className="input-label">Username/Email</label>
+                        <input type="text" className="input-field w-full" onChange={(e) => setLogin(e.target.value)}/>
+                    </div>
+                    <div>   
+                        <label className="input-label">Password</label>
+                        <input type="password" className="input-field w-full" onChange={(e) => setPassword(e.target.value)}/>
+                    </div>
                 </div>
                 {error && (
             <p
@@ -76,7 +78,7 @@ const submit : FormEventHandler<HTMLFormElement>= async(e) => {
             {error}
             </p>
         )}
-                <button className="button">Login</button>
+                <button className="button w-full">Login</button>
             </form>
         </div>
     )

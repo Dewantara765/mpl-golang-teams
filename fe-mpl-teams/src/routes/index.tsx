@@ -34,6 +34,9 @@ import CreateDraft from '../views/dashboard/match/create_draft.tsx'
 import UpdateFirstPick from '../views/dashboard/match/update_fp.tsx'
 import Login from '../views/dashboard/auth/login.tsx'
 import AdminRoute from '../components/AdminRoute.tsx'
+import RegionIndex from '../views/dashboard/region/index.tsx'
+import RegionCreate from '../views/dashboard/region/create.tsx'
+import RegionEdit from '../views/dashboard/region/edit.tsx'
     
 export default function AppRoutes() {
   return (
@@ -76,6 +79,9 @@ export default function AppRoutes() {
           <Route path="/dashboard/standing" element={<DashboardStandingIndex/>}/>
           <Route path="/dashboard/match/:id/game/:game_id/create" element={<CreateDraft/>}/>
           <Route path="/dashboard/match/:id/game/:game_id/update_fp" element={<UpdateFirstPick/>}/>
+          <Route path="/dashboard/region" element={<RegionIndex/>}/>
+          <Route path="/dashboard/region/create" element={<RegionCreate/>}/>
+          <Route path="/dashboard/region/edit/:id" element={<RegionEdit/>}/>
         </Route>
       </Route>
     </Routes>

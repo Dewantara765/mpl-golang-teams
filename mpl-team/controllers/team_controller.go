@@ -1,104 +1,120 @@
 package controllers
 
 import (
-	"fmt"
+	"errors"
 	"mpl-team/config"
+	apperrors "mpl-team/errors"
+	"mpl-team/helpers"
 	"mpl-team/models"
+	"mpl-team/services"
 	"net/http"
 	"os"
-	"strings"
-	"time"
+	"strconv"
+
+	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
 )
 
-// GET /teams
-func FindTeams(c *gin.Context) {
-	var teams []models.Team
-	if err := config.DB.Find(&teams).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch teams"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": teams})
+type TeamController struct {
+	TeamService *services.TeamService
 }
 
-func FindTeamByID(c *gin.Context) {
-	id := c.Param("id")
-	var team models.Team
+func NewTeamController(
+	teamService *services.TeamService,
+) *TeamController {
+	return &TeamController{
+		TeamService: teamService,
+	}
+}
 
-	if err := config.DB.First(&team, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Team not found"})
+// GET /teams
+func (tc *TeamController) FindTeams(c *gin.Context) {
+	pagination, err := helpers.GetPagination(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": team})
+	result, err := tc.TeamService.FindTeams(pagination)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to retrieve matches",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+func (tc *TeamController) FindTeamByID(c *gin.Context) {
+	id, err := strconv.ParseUint(
+		c.Param("id"),
+		10, 64,
+	)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid team ID"})
+		return
+	}
+
+	team, err := tc.TeamService.FindByID(config.DB, uint(id))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "Team not found",
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to retrieve team",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": team,
+	})
 }
 
 // POST /teams
-func CreateTeam(c *gin.Context) {
-	name := strings.TrimSpace(c.PostForm("name"))
-	shortName := strings.TrimSpace(c.PostForm("short_name"))
+func (tc *TeamController) CreateTeam(c *gin.Context) {
+	name := c.PostForm("name")
+	shortName := c.PostForm("short_name")
+	regionIDStr := c.PostForm("region_id")
 
-	errors := make(map[string]string)
-
-	if name == "" {
-		errors["name"] = "Name is required"
-	}
-
-	if shortName == "" {
-		errors["short_name"] = "Short name is required"
+	regionID, err := strconv.ParseUint(regionIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid uint for region ID"})
+		return
 	}
 
 	file, err := c.FormFile("logo")
 	if err != nil {
-		errors["logo"] = "Logo is required"
+		file = nil
 	}
 
-	if len(errors) > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"errors": errors,
-		})
-		return
-	}
-
-	// Pastikan folder uploads tersedia
-	if err := os.MkdirAll("uploads", os.ModePerm); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"errors": map[string]string{
-				"logo": "Failed to create upload directory",
-			},
-		})
-		return
-	}
-
-	filename := fmt.Sprintf(
-		"uploads/%d-%s",
-		time.Now().UnixNano(),
-		file.Filename,
+	team, err := tc.TeamService.Create(
+		config.DB,
+		name,
+		shortName,
+		uint(regionID),
+		file,
 	)
 
-	if err := c.SaveUploadedFile(file, filename); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"errors": map[string]string{
-				"logo": "Failed to save logo",
-			},
-		})
-		return
-	}
-
-	team := models.Team{
-		Name:      name,
-		ShortName: shortName,
-		Logo:      filename,
-	}
-
-	if err := config.DB.Create(&team).Error; err != nil {
-		// Hapus file jika database gagal
-		os.Remove(filename)
+	if err != nil {
+		if validationErrors, ok := err.(apperrors.ValidationErrors); ok {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"errors": validationErrors,
+			})
+			return
+		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"errors": map[string]string{
-				"team": "Failed to create team",
+				"team": err.Error(),
 			},
 		})
 		return
@@ -109,45 +125,67 @@ func CreateTeam(c *gin.Context) {
 	})
 }
 
-func UpdateTeam(c *gin.Context) {
-	id := c.Param("id")
-
-	var team models.Team
-	if err := config.DB.Where("id = ?", id).First(&team).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Team not found"})
+func (tc *TeamController) UpdateTeam(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil || id == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"errors": apperrors.ValidationErrors{
+				"id": "Invalid team ID",
+			},
+		})
 		return
 	}
 
-	name := strings.TrimSpace(c.PostForm("name"))
-	shortName := strings.TrimSpace(c.PostForm("short_name"))
+	name := c.PostForm("name")
+	shortName := c.PostForm("short_name")
+	regionIDStr := c.PostForm("region_id")
 
-	if name != "" {
-		team.Name = name
-	}
-
-	if shortName != "" {
-		team.ShortName = shortName
+	regionID, err := strconv.ParseUint(regionIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid uint for region ID"})
+		return
 	}
 
 	file, err := c.FormFile("logo")
-	if err == nil {
-		if team.Logo != "" {
-			os.Remove(team.Logo)
-		}
+	if err != nil {
+		file = nil
+	}
 
-		newPath := fmt.Sprintf("uploads/%d-%s", time.Now().UnixNano(), file.Filename)
-		if err := c.SaveUploadedFile(file, newPath); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"errors": map[string]string{"logo": "Failed to save logo"}})
+	team, err := tc.TeamService.Update(
+		config.DB,
+		uint(id),
+		name,
+		shortName,
+		uint(regionID),
+		file,
+	)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "Team not found",
+			})
 			return
 		}
-		team.Logo = newPath
-	}
 
-	if err := config.DB.Save(&team).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"errors": map[string]string{"team": "Failed to update team"}})
+		if validationErrors, ok := err.(apperrors.ValidationErrors); ok {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"errors": validationErrors,
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"errors": map[string]string{
+				"team": "Failed to update team",
+			},
+		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": team})
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": team,
+	})
 }
 
 func DeleteTeam(c *gin.Context) {

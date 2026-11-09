@@ -89,24 +89,55 @@ export default function DashboardMatchShow(){
             try {
                 const response = await api.get(`matches/${id}`)
                 const matchData = response.data.data;
-                setMatch(matchData)
-                setDate(formatDate(matchData.date))
-                setTime(formatTime(matchData.time))
-                setGames(matchData.games)
+                console.log("Requested ID:", id);
+                console.log("Fetched Match ID:", matchData.id);
+                console.log("Fetched Games:", matchData.games);
+                console.log("Match ID from URL:", id);
+                console.log("Games state:", games);
+
+                setMatch(matchData);
+                setDate(formatDate(matchData.date));
+                setTime(formatTime(matchData.time));
+                setGames(matchData.games ?? []);
+
 
                 if (matchData.home_team == null) {
-                    setMatch(prevMatch => prevMatch ? { ...prevMatch, home_team: { name: "Home Team", short_name: "Home Team", logo: "uploads/teamlogo.jpg" } } : null);
-                }
-                if (matchData.away_team == null) {
-                    setMatch(prevMatch => prevMatch ? { ...prevMatch, away_team: { name: "Away Team", short_name: "Away Team", logo: "uploads/teamlogo.jpg" } } : null);
-                }
+                setMatch(prevMatch =>
+                    prevMatch
+                        ? {
+                            ...prevMatch,
+                            home_team: {
+                                name: "Home Team",
+                                short_name: "Home Team",
+                                logo: "uploads/teamlogo.jpg"
+                            }
+                        }
+                        : null
+                );
+            }
+
+            if (matchData.away_team == null) {
+                setMatch(prevMatch =>
+                    prevMatch
+                        ? {
+                            ...prevMatch,
+                            away_team: {
+                                name: "Away Team",
+                                short_name: "Away Team",
+                                logo: "uploads/teamlogo.jpg"
+                            }
+                        }
+                        : null
+                );
+            }
             }catch (error : any) {
                 console.error("Error fetching matches:", error);
             }
         }
         fetchMatch()
         
-    },[])
+    },[id])
+    
         const fetchHeroDrafts = async (gameId: number) => {
         try {
             const response = await api.get(`hero-drafts/games/${gameId}`);

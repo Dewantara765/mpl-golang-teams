@@ -4,5 +4,7 @@ type Team struct {
 	ID        uint   `json:"id" gorm:"primaryKey"`
 	Name      string `json:"name" binding:"required"`
 	ShortName string `json:"short_name" binding:"required"`
+	RegionID  uint   `json:"region_id" binding:"required"`
+	Region    Region `json:"region" gorm:"foreignKey:RegionID"`
 	Logo      string `json:"logo" binding:"required"`
 }

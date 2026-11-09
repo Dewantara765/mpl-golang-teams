@@ -5,6 +5,7 @@ import (
 	apperrors "mpl-team/errors"
 	"time"
 
+	"mpl-team/helpers"
 	"mpl-team/models"
 	"mpl-team/repositories"
 
@@ -118,47 +119,28 @@ func (s *MatchService) CreateMatch(
 }
 
 type MatchPagination struct {
-	Data       []models.Match `json:"data"`
-	Page       int            `json:"page"`
-	PageSize   int            `json:"pageSize"`
-	TotalPage  int            `json:"totalPage"`
-	TotalCount int64          `json:"totalCount"`
+	Data []models.Match `json:"data"`
+	helpers.Pagination
 }
 
 func (s *MatchService) FindMatches(
-	page int,
-	pageSize int,
+	pagination helpers.Pagination,
 ) (*MatchPagination, error) {
 
-	if page < 1 {
-		page = 1
-	}
-
-	if pageSize < 1 {
-		pageSize = 7
-	}
-
-	offset := (page - 1) * pageSize
-
-	matches, totalCount, err :=
-		s.MatchRepository.FindAll(offset, pageSize)
+	matches, totalCount, err := s.MatchRepository.FindAll(
+		pagination.Offset,
+		pagination.PageSize,
+	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	totalPage := int(totalCount) / pageSize
-
-	if totalCount%int64(pageSize) != 0 {
-		totalPage++
-	}
+	pagination.SetTotal(totalCount)
 
 	return &MatchPagination{
 		Data:       matches,
-		Page:       page,
-		PageSize:   pageSize,
-		TotalPage:  totalPage,
-		TotalCount: totalCount,
+		Pagination: pagination,
 	}, nil
 }
 
