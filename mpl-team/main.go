@@ -43,6 +43,8 @@ func main() {
 	gameRepository := repositories.NewGameRepository(db)
 	eventRepository := repositories.NewEventRepository(db)
 	regionRepository := repositories.NewRegionRepository(db)
+	tournamentRepository := repositories.NewTournamentRepository(db)
+	phaseRepository := repositories.NewPhaseRepository(db)
 
 	// =========================
 	// Services
@@ -82,6 +84,14 @@ func main() {
 		regionRepository,
 	)
 
+	tournamentService := services.NewTournamentService(
+		tournamentRepository,
+	)
+
+	phaseService := services.NewPhaseService(
+		phaseRepository,
+	)
+
 	// =========================
 	// Controllers
 	// =========================
@@ -101,6 +111,10 @@ func main() {
 	eventController := controllers.NewEventController(eventService)
 
 	regionController := controllers.NewRegionController(regionService)
+
+	tournamentController := controllers.NewTournamentController(tournamentService)
+
+	phaseController := controllers.NewPhaseController(phaseService)
 
 	// =========================
 	// Router
@@ -126,6 +140,8 @@ func main() {
 		teamController,
 		eventController,
 		regionController,
+		tournamentController,
+		phaseController,
 	)
 
 	r.Static("/uploads", "./uploads")

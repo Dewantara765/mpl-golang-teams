@@ -132,7 +132,7 @@ func (ec *EventController) CreateEvent(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to create match",
+			"message": "Failed to create event",
 		})
 		return
 	}
@@ -148,7 +148,7 @@ func (ec *EventController) UpdateEvent(c *gin.Context) {
 	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid match ID",
+			"error": "Invalid event ID",
 		})
 		return
 	}

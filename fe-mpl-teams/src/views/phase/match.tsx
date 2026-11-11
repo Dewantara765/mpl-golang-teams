@@ -85,7 +85,7 @@ export default function PhaseMatches(){
                 const response = await api.get(
                     `/tournaments/${slug}/phases/${phaseSlug}`
                 );
-                const phaseData = response.data;
+                const phaseData = response.data.data;
                 const eventsData = phaseData.events.map((event: any) => ({
                     ...event,
                     matches: event.matches.map((match: any) => ({

@@ -1,20 +1,36 @@
 package controllers
 
 import (
+	"errors"
 	"mpl-team/config"
+	apperrors "mpl-team/errors"
 	"mpl-team/models"
+	"mpl-team/services"
 	"net/http"
-	"time"
+	"strconv"
 
 	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
+type TournamentController struct {
+	TournamentService *services.TournamentService
+}
+
+func NewTournamentController(
+	tournamentService *services.TournamentService,
+) *TournamentController {
+	return &TournamentController{
+		TournamentService: tournamentService,
+	}
+}
+
 // GET /tournaments
-func FindTournaments(c *gin.Context) {
-	var tournaments []models.Tournament
-	if err := config.DB.Preload("Phases").Find(&tournaments).Error; err != nil {
+func (tc *TournamentController) FindTournaments(c *gin.Context) {
+	tournaments, err := tc.TournamentService.FindTournaments()
+	if err != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to retrieve tournaments"})
@@ -25,59 +41,46 @@ func FindTournaments(c *gin.Context) {
 	})
 }
 
-func FindPhaseWithMatches(c *gin.Context) {
+func (tc *TournamentController) FindPhaseWithMatches(c *gin.Context) {
 	tournamentSlug := c.Param("tournamentSlug")
 	phaseSlug := c.Param("phaseSlug")
 
-	var phase models.Phase
-
-	err := config.DB.
-		Joins("JOIN tournaments ON tournaments.id = phases.tournament_id").
-		Where("tournaments.slug = ?", tournamentSlug).
-		Where("phases.slug = ?", phaseSlug).
-		Preload("Tournament").
-		Preload("Events").
-		Preload("Events.Matches").
-		Preload("Events.Matches.HomeTeam").
-		Preload("Events.Matches.AwayTeam").
-		Preload("Events.Matches.Games").
-		Preload("Events.Matches.Games.HeroDrafts").
-		Preload("Events.Matches.Games.HeroDrafts.Hero").
-		First(&phase).Error
+	phase, err := tc.TournamentService.FindPhaseWithMatches(
+		tournamentSlug,
+		phaseSlug,
+	)
 
 	if err != nil {
+		// Sesuaikan dengan handler error milikmu.
 		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Phase not found",
+			"error": err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, phase)
+	c.JSON(http.StatusOK, gin.H{
+		"data": phase,
+	})
 }
 
-func FindTournamentBySlug(c *gin.Context) {
+func (tc *TournamentController) FindTournamentBySlug(c *gin.Context) {
 	slug := c.Param("slug")
-	var tournament models.Tournament
 
-	if err := config.DB.Preload("Phases").
-		Preload("Phases.Events").
-		Preload("Phases.Standings", func(db *gorm.DB) *gorm.DB {
-			return db.Order(`
-				match_win DESC,
-				game_diff DESC,
-				game_win DESC,
-				id DESC
-			`)
-		}).
-		Preload("Phases.Standings.Team").
-		Preload("Phases.Events.Matches", func(db *gorm.DB) *gorm.DB {
-			return db.Where("status = ?", "completed")
-		}).
-		First(&tournament, "slug = ?", slug).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Tournament not found"})
+	tournament, err := tc.TournamentService.FindTournamentBySlug(slug)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "Tournament not found",
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to retrieve tournament",
+		})
 		return
-	}
 
+	}
 	c.JSON(http.StatusOK, gin.H{"data": tournament})
 }
 
@@ -99,103 +102,114 @@ func FindTournamentByID(c *gin.Context) {
 }
 
 // POST /tournaments
-func CreateTournament(c *gin.Context) {
+func (tc *TournamentController) CreateTournament(c *gin.Context) {
 	var input struct {
 		Name      string `json:"name" binding:"required"`
 		StartDate string `json:"start_date" binding:"required"`
 		EndDate   string `json:"end_date" binding:"required"`
 		Slug      string `json:"slug" binding:"required"`
+		RegionID  uint   `json:"region_id" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"errors": map[string]string{
-				"input": err.Error(),
-			},
-		})
-		return
-	}
+		errors := make(map[string]string)
 
-	errors := make(map[string]string)
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			for _, fieldErr := range validationErrors {
+				switch fieldErr.Field() {
+				case "Name":
+					errors["name"] = "Name wajib diisi"
+				case "StartDate":
+					errors["start_date"] = "Start date wajib diisi"
+				case "EndDate":
+					errors["end_date"] = "End date wajib diisi"
+				case "Slug":
+					errors["slug"] = "Slug wajib diisi"
+				case "RegionID":
+					errors["region_id"] = "Region wajib diisi"
+				}
+			}
+		} else {
+			errors["general"] = "Invalid request data"
+		}
 
-	// Validasi tanggal
-	startDate, err := time.Parse("2006-01-02", input.StartDate)
-	if err != nil {
-		errors["start_date"] = "Start date must be in YYYY-MM-DD format"
-	}
-
-	endDate, err := time.Parse("2006-01-02", input.EndDate)
-	if err != nil {
-		errors["end_date"] = "End date must be in YYYY-MM-DD format"
-	}
-
-	// Pastikan start date <= end date
-	if len(errors) == 0 && endDate.Before(startDate) {
-		errors["end_date"] = "End date must be after or equal to start date"
-	}
-
-	if len(errors) > 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"errors": errors,
 		})
 		return
 	}
 
-	tournament := models.Tournament{
+	tournamentInput := services.CreateTournamentInput{
 		Name:      input.Name,
 		StartDate: input.StartDate,
 		EndDate:   input.EndDate,
 		Slug:      input.Slug,
+		RegionID:  input.RegionID,
 	}
 
-	if err := config.DB.Create(&tournament).Error; err != nil {
+	// Call service
+	tournament, err := tc.TournamentService.Create(tournamentInput)
+	if err != nil {
+		if validationErr, ok := err.(apperrors.ValidationErrors); ok {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"errors": validationErr,
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"errors": map[string]string{
-				"tournament": "Failed to create tournament",
-			},
+			"message": "Failed to create tournament",
 		})
 		return
 	}
-
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "Tournament created successfully",
-		"data":    tournament,
+		"data": tournament,
 	})
 }
 
-func UpdateTournament(c *gin.Context) {
-	id := c.Param("id")
-	var tournament models.Tournament
+type UpdateTournamentInput struct {
+	Name      *string `json:"name"`
+	StartDate *string `json:"start_date"`
+	EndDate   *string `json:"end_date"`
+	Slug      *string `json:"slug"`
+}
 
-	if err := config.DB.First(&tournament, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Tournament not found"})
-		return
-	}
-
-	var input struct {
-		Name      string `json:"name"`
-		StartDate string `json:"start_date"`
-		EndDate   string `json:"end_date"`
-		Slug      string `json:"slug"`
-	}
-
-	if err := c.ShouldBindJSON(&input); err != nil {
+func (tc *TournamentController) UpdateTournament(c *gin.Context) {
+	// Ambil ID dari URL
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid input",
-			"error":   err.Error(),
+			"error": "Invalid tournament ID",
 		})
 		return
 	}
 
-	tournament.Name = input.Name
-	tournament.StartDate = input.StartDate
-	tournament.EndDate = input.EndDate
-	tournament.Slug = input.Slug
+	// Binding JSON
+	var input services.UpdateTournamentInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid request body",
+		})
+		return
+	}
 
-	if err := config.DB.Save(&tournament).Error; err != nil {
+	// Panggil service
+	tournament, err := tc.TournamentService.UpdateTournament(
+		uint(id),
+		input,
+	)
+
+	if err != nil {
+		// Sesuaikan dengan tipe error yang kamu gunakan
+		if validationErr, ok := err.(*apperrors.ValidationErrors); ok {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{
+				"errors": validationErr,
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to update tournament",
-			"error":   err.Error(),
+			"error": err.Error(),
 		})
 		return
 	}

@@ -16,6 +16,8 @@ func SetupRoutes(
 	teamController *controllers.TeamController,
 	eventController *controllers.EventController,
 	regionController *controllers.RegionController,
+	tournamentController *controllers.TournamentController,
+	phaseController *controllers.PhaseController,
 ) {
 
 	auth := router.Group("/auth")
@@ -34,12 +36,12 @@ func SetupRoutes(
 	admin.PUT("/teams/:id", teamController.UpdateTeam)
 	admin.DELETE("/teams/:id", controllers.DeleteTeam)
 
-	admin.POST("/tournaments", controllers.CreateTournament)
-	admin.PUT("/tournaments/:id", controllers.UpdateTournament)
+	admin.POST("/tournaments", tournamentController.CreateTournament)
+	admin.PUT("/tournaments/:id", tournamentController.UpdateTournament)
 	admin.DELETE("/tournaments/:id", controllers.DeleteTournament)
 
-	admin.POST("/phases", controllers.CreatePhase)
-	admin.PUT("/phases/:id", controllers.UpdatePhase)
+	admin.POST("/phases", phaseController.CreatePhase)
+	admin.PUT("/phases/:id", phaseController.UpdatePhase)
 	admin.DELETE("/phases/:id", controllers.DeletePhase)
 
 	admin.POST("/events", eventController.CreateEvent)
@@ -82,17 +84,17 @@ func SetupRoutes(
 
 	tournament := router.Group("/tournaments")
 	{
-		tournament.GET("", controllers.FindTournaments)
-		tournament.GET("/:tournamentSlug/phases/:phaseSlug", controllers.FindPhaseWithMatches)
-		tournament.GET("/slug/:slug", controllers.FindTournamentBySlug)
+		tournament.GET("", tournamentController.FindTournaments)
+		tournament.GET("/:tournamentSlug/phases/:phaseSlug", tournamentController.FindPhaseWithMatches)
+		tournament.GET("/slug/:slug", tournamentController.FindTournamentBySlug)
 		tournament.GET("/db/:id", controllers.FindTournamentByID)
 
 	}
 
 	phase := router.Group("/phases")
 	{
-		phase.GET("", controllers.FindPhases)
-		phase.GET("/:id", controllers.FindPhaseByID)
+		phase.GET("", phaseController.FindPhases)
+		phase.GET("/:id", phaseController.FindPhaseByID)
 
 	}
 

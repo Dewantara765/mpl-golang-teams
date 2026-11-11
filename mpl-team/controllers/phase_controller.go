@@ -1,37 +1,63 @@
 package controllers
 
 import (
+	"errors"
 	"mpl-team/config"
+	apperrors "mpl-team/errors"
 	"mpl-team/models"
+	"mpl-team/services"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
 )
 
-func FindPhases(c *gin.Context) {
-	var phases []models.Phase
-	if err := config.DB.
-		Preload("Tournament").
-		Preload("Events").Find(&phases).Error; err != nil {
+type PhaseController struct {
+	PhaseService *services.PhaseService
+}
+
+func NewPhaseController(
+	phaseService *services.PhaseService,
+) *PhaseController {
+	return &PhaseController{
+		PhaseService: phaseService,
+	}
+}
+
+func (pc *PhaseController) FindPhases(c *gin.Context) {
+	phases, err := pc.PhaseService.FindPhases()
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to retrieve phases"})
+			"error": "Failed to retrieve phases",
+		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": phases})
 }
 
-func FindPhaseByID(c *gin.Context) {
-	id := c.Param("id")
-	var phase models.Phase
+func (pc *PhaseController) FindPhaseByID(c *gin.Context) {
+	id, err := strconv.ParseUint(
+		c.Param("id"),
+		10, 64,
+	)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phase ID"})
+		return
+	}
 
-	if err := config.DB.Preload("Events").First(&phase, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Phase not found"})
+	phase, err := pc.PhaseService.FindPhaseByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to retrieve phase",
+		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": phase})
 }
 
-func CreatePhase(c *gin.Context) {
+func (pc *PhaseController) CreatePhase(c *gin.Context) {
 	var input struct {
 		Name         string `json:"name" binding:"required"`
 		TournamentID uint   `json:"tournament_id" binding:"required"`
@@ -39,11 +65,24 @@ func CreatePhase(c *gin.Context) {
 		HasStanding  bool   `json:"has_standing"`
 	}
 
-	errors := make(map[string]string)
-
-	// Bind request JSON
 	if err := c.ShouldBindJSON(&input); err != nil {
-		errors["input"] = err.Error()
+		errors := make(map[string]string)
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			for _, fieldErr := range validationErrors {
+				switch fieldErr.Field() {
+				case "Name":
+					errors["name"] = "Name wajib diisi"
+				case "TournamentID":
+					errors["tournament_id"] = "Tournament wajib diisi"
+				case "Slug":
+					errors["slug"] = "Slug wajib diisi"
+				case "HasStanding":
+					errors["has_standing"] = "Has Standing wajib diisi"
+				}
+			}
+		} else {
+			errors["general"] = "Invalid request data"
+		}
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"errors": errors,
@@ -51,76 +90,74 @@ func CreatePhase(c *gin.Context) {
 		return
 	}
 
-	var tournament models.Tournament
-
-	if err := config.DB.First(&tournament, input.TournamentID).Error; err != nil {
-		errors["tournament_id"] = "Tournament not found"
-
-		c.JSON(http.StatusBadRequest, gin.H{
-			"errors": errors,
-		})
-		return
-	}
-
-	phase := models.Phase{
+	phaseInput := services.CreatePhaseInput{
 		Name:         input.Name,
 		TournamentID: input.TournamentID,
 		Slug:         input.Slug,
 		HasStanding:  input.HasStanding,
 	}
 
-	if err := config.DB.Create(&phase).Error; err != nil {
+	phase, err := pc.PhaseService.Create(phaseInput)
+	if err != nil {
+		if validationErr, ok := err.(apperrors.ValidationErrors); ok {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"errors": validationErr,
+			})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"errors": map[string]string{
-				"phase": "Failed to create phase",
-			},
+			"message": "Failed to create phase",
 		})
 		return
 	}
-
 	c.JSON(http.StatusCreated, gin.H{"data": phase})
 }
 
-func UpdatePhase(c *gin.Context) {
-	id := c.Param("id")
+func (pc *PhaseController) UpdatePhase(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid phase ID",
+		})
+		return
+	}
 
 	var input struct {
-		Name        string `json:"name" binding:"required"`
-		Slug        string `json:"slug" binding:"required"`
-		HasStanding bool   `json:"has_standing"`
+		Name        *string `json:"name"`
+		Slug        *string `json:"slug"`
+		HasStanding *bool   `json:"has_standing"`
 	}
-
-	errors := make(map[string]string)
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		errors["input"] = err.Error()
-
 		c.JSON(http.StatusBadRequest, gin.H{
-			"errors": errors,
+			"error": err.Error(),
 		})
 		return
 	}
 
-	var phase models.Phase
-
-	if err := config.DB.First(&phase, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"errors": map[string]string{
-				"phase": "Phase not found",
-			},
-		})
-		return
+	updateInput := services.UpdatePhaseInput{
+		Name:        input.Name,
+		Slug:        input.Slug,
+		HasStanding: input.HasStanding,
 	}
 
-	phase.Name = input.Name
-	phase.Slug = input.Slug
-	phase.HasStanding = input.HasStanding
+	phase, err := pc.PhaseService.Update(
+		uint(id),
+		updateInput,
+	)
 
-	if err := config.DB.Save(&phase).Error; err != nil {
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "Phase not found",
+			})
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"errors": map[string]string{
-				"phase": "Failed to update phase",
-			},
+			"error": err.Error(),
 		})
 		return
 	}
