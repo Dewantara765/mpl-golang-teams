@@ -13,6 +13,7 @@ func FindStandings(c *gin.Context) {
 
 	if err := config.DB.Preload("Team").
 		Preload("Phase").
+		Preload("Phase.Tournament").
 		Order("match_win DESC").
 		Order("game_diff DESC").
 		Order("game_win DESC").

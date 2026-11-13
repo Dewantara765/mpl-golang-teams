@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"math"
 	"mpl-team/config"
 	apperrors "mpl-team/errors"
 	"mpl-team/helpers"
@@ -30,7 +31,6 @@ func NewMatchController(
 }
 
 func (mc *MatchController) FindMatches(c *gin.Context) {
-
 	pagination, err := helpers.GetPagination(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -39,7 +39,15 @@ func (mc *MatchController) FindMatches(c *gin.Context) {
 		return
 	}
 
-	result, err := mc.MatchService.FindMatches(pagination)
+	tournamentID, _ := strconv.ParseUint(
+		c.Query("tournament_id"), 10, 32,
+	)
+
+	matches, totalCount, err := mc.MatchService.FindMatches(
+		pagination,
+		uint(tournamentID),
+	)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to retrieve matches",
@@ -47,7 +55,17 @@ func (mc *MatchController) FindMatches(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	totalPages := int(math.Ceil(
+		float64(totalCount) / float64(pagination.PageSize),
+	))
+
+	c.JSON(http.StatusOK, gin.H{
+		"data":        matches,
+		"total":       totalCount,
+		"total_pages": totalPages,
+		"page":        pagination.Page,
+		"limit":       pagination.PageSize,
+	})
 }
 func (mc *MatchController) FindMatchByID(c *gin.Context) {
 

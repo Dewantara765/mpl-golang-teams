@@ -1,15 +1,19 @@
-import {useEffect, useState} from "react";
+import {useEffect, useState, useMemo} from "react";
+import { useNavigate } from "react-router-dom";
 import  api  from "../../../services/axios";
 import { Link, useSearchParams } from "react-router-dom";
 import { getPaginationPages } from "../../../../utils/pagination";
 export default function DashboardMatchIndex(){
     const [matches, setMatches] = useState<Match[]>([]);
+    const [tournaments, setTournaments] = useState<Tournament[]>([])
+    const [selectedTournament, setSelectedTournament] = useState("1");
     const [page, setPage] = useState(1);
     const [total_pages, setTotalPages] = useState(0);
     const pages = getPaginationPages(page, total_pages);
     const [sort, setSort] = useState<string>("id");
     const [order, setOrder] = useState<string>("asc");
     const [searchParams] = useSearchParams()
+    const navigate = useNavigate()
     
 
     const formatDate = (date: string) => {
@@ -21,6 +25,30 @@ export default function DashboardMatchIndex(){
         const formattedTime = time.slice(0,5)
         return formattedTime
     }
+
+    const createPageUrl = (newPage) => {
+        const params = new URLSearchParams(location.search);
+
+        params.set("page", newPage);
+
+        return `/dashboard/match?${params.toString()}`;
+    };
+
+    const filteredMatches = useMemo(() => {
+            return matches.filter(
+                (match) =>
+                match.event.phase.tournament_id === Number(selectedTournament)
+            );
+    }, [matches, selectedTournament]);
+
+    const handleTournamentChange = (tournamentID : string) => {
+        const params = new URLSearchParams(searchParams);
+
+        params.set("tournament_id", tournamentID);
+        params.set("page", "1");
+
+        navigate(`/dashboard/match?${params.toString()}`);
+    };
 
     interface Match {
         id: number,
@@ -38,6 +66,7 @@ export default function DashboardMatchIndex(){
         event: {
             name: string,
             phase: {
+                tournament_id: number,
                 name: string,
                 tournament: {
                     name: string,
@@ -46,31 +75,53 @@ export default function DashboardMatchIndex(){
         },
     }
 
+    interface Tournament {
+        id: number,
+        name: string,
+        start_date: string,
+        end_date: string,
+        slug: string,
+    }   
+
     useEffect(() => {
         document.title = "Dashboard - Match Index"
         const fetchMatches = async () => {
             const page = searchParams.get("page") || "1";
             const sort = searchParams.get("sort") || "id";
             const order = searchParams.get("order") || "desc"; 
+            const tournament_id = searchParams.get("tournament_id") || "1";
             try {
                 const response = await api.get("/matches", {
                     params: {
                         page,
                         sort,
                         order,
+                        tournament_id,
                     }
                 });
                 setPage(Number(page))
                 setSort(sort)
                 setOrder(order)
                 setMatches(response.data.data)
-                setTotalPages(response.data.totalPage)
+                setTotalPages(response.data.total_pages)
+                setSelectedTournament(tournament_id)
             } catch (error) {
                 console.error("Error fetching matches:", error);
             }
         };
+
+        const fetchTournaments = async() => {
+            try {
+                const response = await api.get("/tournaments")
+                setTournaments(response.data.data)
+            }catch (error) {
+                console.error("error fetching tournaments", error)
+            }
+        }
+
         fetchMatches();
-    },[searchParams, page, sort, order])
+        fetchTournaments()
+    },[searchParams, page, sort, order, selectedTournament])
 
     const handleDelete = async (id: number) => {
         try {
@@ -89,6 +140,17 @@ export default function DashboardMatchIndex(){
             <Link to="/dashboard/match/create" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                 Create Match
             </Link>
+
+            <select
+                value={selectedTournament}
+                onChange={(e) => handleTournamentChange(e.target.value)}
+                >
+                {tournaments.map((tournament) => (
+                    <option key={tournament.id} value={tournament.id}>
+                    {tournament.name}
+                    </option>
+                ))}
+            </select>
             <table className="table-container">
                     <thead>
                         <tr>
@@ -105,7 +167,7 @@ export default function DashboardMatchIndex(){
 
                     </thead>
                     <tbody>
-                        {matches.map((match, index) => (
+                        {filteredMatches.map((match, index) => (
                             <tr key={match.id}>
                                 <td className="table-cell">{index + 1}</td>
                                 <td className="table-cell">{!match.home_team?.short_name ? "TBD" : match.home_team.short_name} {match.home_score ?? ""}-{match.away_score ?? ""} {!match.away_team?.short_name ? "TBD" : match.away_team.short_name}</td>
@@ -134,65 +196,65 @@ export default function DashboardMatchIndex(){
                 </table>
                 <div className="flex items-center gap-2 mt-6">
 
-                    {/* Previous */}
-                    {page !== 1 ?
-                    <Link to={`/dashboard/match?page=${page - 1}&order=desc`}>
-                        <button
-                            className="px-3 py-2 border rounded"
-                        >
-                            Previous
-                        </button>
-                    </Link>
-                    : 
-                    <button
-                            className="px-3 py-2 border rounded opacity-50"
-                        >
-                            Previous
-                        </button>}
-
-                    {/* Page Numbers */}
-                    {pages.map((item, index) => {
-
-                        if (item === "...") {
-                            return (
-                                <span key={`dots-${index}`} className="px-2">
-                                    ...
-                                </span>
-                            );
-                        }
-
-                        return (
-                        <Link key={item} to={`/dashboard/match?page=${item}&order=${order}`}>
+                        {/* Previous */}
+                        {page > 1 ? (
+                            <Link to={createPageUrl(page - 1)}>
+                                <button className="px-3 py-2 border rounded">
+                                    Previous
+                                </button>
+                            </Link>
+                        ) : (
                             <button
-                                className={`px-3 py-2 border rounded ${
-                                    page === item
-                                        ? "bg-blue-600 text-white"
-                                        : "bg-white text-black"
-                                }`}
+                                disabled
+                                className="px-3 py-2 border rounded opacity-50"
                             >
-                                {item}
+                                Previous
                             </button>
-                        </Link>
-                        );
-                    })}
+                        )}
 
-                    {/* Next */}
-                    {page !== total_pages ?
-                    <Link to={`/dashboard/match?page=${page + 1}&order=desc`}>
-                        <button
-                            className="px-3 py-2 border rounded"
-                        >
-                            Next
-                        </button>
-                    </Link>
-                    : 
-                    <button
-                            className="px-3 py-2 border rounded opacity-50"
-                        >
-                            Next
-                        </button>}
+                        {/* Page Numbers */}
+                        {pages.map((item, index) => {
 
-                </div>
+                            if (item === "...") {
+                                return (
+                                    <span key={`dots-${index}`} className="px-2">
+                                        ...
+                                    </span>
+                                );
+                            }
+
+                            return (
+                                <Link key={item} to={createPageUrl(item)}>
+                                    <button
+                                        className={`px-3 py-2 border rounded ${
+                                            page === item
+                                                ? "bg-blue-600 text-white"
+                                                : "bg-white text-black"
+                                        }`}
+                                    >
+                                        {item}
+                                    </button>
+                                </Link>
+                            );
+                        })}
+
+                        {/* Next */}
+                        {page < total_pages ? (
+                            <Link to={createPageUrl(page + 1)}>
+                                <button className="px-3 py-2 border rounded">
+                                    Next
+                                </button>
+                            </Link>
+                        ) : (
+                            <button
+                                disabled
+                                className="px-3 py-2 border rounded opacity-50"
+                            >
+                                Next
+                            </button>
+                        )}
+
+                    </div>
                     </div>
                 )
 }

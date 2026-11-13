@@ -46,6 +46,7 @@ func (r *TeamRepository) FindAll(
 	offset int,
 	limit int,
 	search string,
+	all bool,
 ) ([]models.Team, int64, error) {
 	var teams []models.Team
 	var totalCount int64
@@ -66,13 +67,18 @@ func (r *TeamRepository) FindAll(
 	}
 
 	// Get data
-	err := query.
-		Offset(offset).
-		Limit(limit).
+	dataQuery := query.
 		Preload("Region").
-		Find(&teams).Error
+		Order("name ASC")
 
-	if err != nil {
+	// Pagination hanya jika all = false
+	if !all {
+		dataQuery = dataQuery.
+			Offset(offset).
+			Limit(limit)
+	}
+
+	if err := dataQuery.Find(&teams).Error; err != nil {
 		return nil, 0, err
 	}
 

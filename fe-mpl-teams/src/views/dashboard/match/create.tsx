@@ -45,7 +45,7 @@ export default function CreateMatch() {
         document.title = "Dashboard - Create Match"
         const fetchTeams = async () => {
             try {
-                const response = await api.get("/teams");
+                const response = await api.get("/teams?all=true");
                 setTeams(response.data.data);
             } catch (error) {
                 console.error("Error fetching teams:", error);

@@ -51,25 +51,18 @@ type TeamPagination struct {
 }
 
 func (s *TeamService) FindTeams(
-	pagination helpers.Pagination,
-) (*TeamPagination, error) {
+	offset int,
+	limit int,
+	search string,
+	all bool,
+) ([]models.Team, int64, error) {
 
-	teams, totalCount, err := s.TeamRepository.FindAll(
-		pagination.Offset,
-		pagination.PageSize,
-		pagination.Search,
+	return s.TeamRepository.FindAll(
+		offset,
+		limit,
+		search,
+		all,
 	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	pagination.SetTotal(totalCount)
-
-	return &TeamPagination{
-		Data:       teams,
-		Pagination: pagination,
-	}, nil
 }
 
 func SaveUploadedFile(

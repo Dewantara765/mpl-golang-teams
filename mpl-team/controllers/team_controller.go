@@ -38,15 +38,28 @@ func (tc *TeamController) FindTeams(c *gin.Context) {
 		return
 	}
 
-	result, err := tc.TeamService.FindTeams(pagination)
+	all := c.Query("all") == "true"
+
+	teams, totalCount, err := tc.TeamService.FindTeams(
+		pagination.Offset,
+		pagination.PageSize,
+		pagination.Search,
+		all,
+	)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to retrieve matches",
+			"error": "Failed to retrieve teams",
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, gin.H{
+		"data": teams,
+		"meta": gin.H{
+			"total": totalCount,
+		},
+	})
 }
 
 func (tc *TeamController) FindTeamByID(c *gin.Context) {

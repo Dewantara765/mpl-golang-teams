@@ -1,7 +1,10 @@
 import  api  from "../../../services/axios"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
+
 export default function DashboardStandingIndex(){
     const [standings, setStandings] = useState<Standing[]>([])
+    const [tournaments, setTournaments] = useState<Tournament[]>([])
+    const [selectedTournament, setSelectedTournament] = useState("1");
 
     const formatGameDiff = (game_diff: number) => {
         let formattedGameDiff;
@@ -12,6 +15,13 @@ export default function DashboardStandingIndex(){
         }
         return formattedGameDiff;
     }
+
+    const filteredStandings = useMemo(() => {
+        return standings.filter(
+            (standing) =>
+            standing.phase.tournament_id === Number(selectedTournament)
+        );
+        }, [standings, selectedTournament]);
 
     interface Standing {
         id : number,
@@ -26,6 +36,17 @@ export default function DashboardStandingIndex(){
         game_win: number,
         game_lose: number,
         game_diff: number
+        phase : {
+            tournament_id: number,
+        }
+    }
+
+    interface Tournament {
+        id: number,
+        name: string,
+        start_date: string,
+        end_date: string,
+        slug: string,
     }
     useEffect(() => {
         const fetchStandings = async() => {
@@ -36,12 +57,32 @@ export default function DashboardStandingIndex(){
                 console.error("error fetching standings", error)
             }
         }
+
+        const fetchTournaments = async() => {
+            try {
+                const response = await api.get("/tournaments")
+                setTournaments(response.data.data)
+            }catch (error) {
+                console.error("error fetching tournaments", error)
+            }
+        }
         fetchStandings()
-    },[])
+        fetchTournaments()
+    },[selectedTournament])
     return (
         <div className="p-4">
             <title>Standings</title>
             <p className="font-bold text-2xl">Standings</p>
+            <select
+                value={selectedTournament}
+                onChange={(e) => setSelectedTournament(e.target.value)}
+                >
+                {tournaments.map((tournament) => (
+                    <option key={tournament.id} value={tournament.id}>
+                    {tournament.name}
+                    </option>
+                ))}
+            </select>
             <table className="table-auto border-collapse border border-gray-300 mt-4 p-2">
                     <thead>
                         <tr>
@@ -55,7 +96,7 @@ export default function DashboardStandingIndex(){
 
                     </thead>
                     <tbody>
-                        {standings.map((standing, index: number) => {
+                        {filteredStandings.map((standing, index: number) => {
                             const position = index + 1;
 
                             let rowClass = "";

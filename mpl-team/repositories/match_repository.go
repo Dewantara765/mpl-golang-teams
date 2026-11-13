@@ -107,28 +107,42 @@ func (r *MatchRepository) UpdateScoreAndStatus(
 	}).Error
 }
 
-func (r *MatchRepository) FindAll(offset int, limit int) ([]models.Match, int64, error) {
+func (r *MatchRepository) FindAll(offset int, limit int, search string,
+	tournamentID uint) ([]models.Match, int64, error) {
 	var matches []models.Match
 	var totalCount int64
 
-	// Total data
-	if err := r.DB.
-		Model(&models.Match{}).
-		Count(&totalCount).Error; err != nil {
+	query := r.DB.Model(&models.Match{})
+
+	// Search
+	if search != "" {
+		query = query.Where("name LIKE ?", "%"+search+"%")
+	}
+
+	// Filter tournament
+	if tournamentID > 0 {
+		query = query.
+			Joins("JOIN events ON events.id = matches.event_id").
+			Joins("JOIN phases ON phases.id = events.phase_id").
+			Where("phases.tournament_id = ?", tournamentID).
+			Preload("Event").
+			Preload("Event.Phase").
+			Preload("Event.Phase.Tournament")
+	}
+
+	// Count setelah filter
+	if err := query.Count(&totalCount).Error; err != nil {
 		return nil, 0, err
 	}
 
-	query := r.DB.
+	// Ambil data
+	if err := query.
 		Preload("HomeTeam").
 		Preload("AwayTeam").
-		Preload("Event").
-		Preload("Event.Phase").
-		Preload("Event.Phase.Tournament").
-		Preload("Games").
+		Order("id DESC").
 		Offset(offset).
-		Limit(limit)
-
-	if err := query.Find(&matches).Error; err != nil {
+		Limit(limit).
+		Find(&matches).Error; err != nil {
 		return nil, 0, err
 	}
 

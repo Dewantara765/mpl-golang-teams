@@ -125,23 +125,23 @@ type MatchPagination struct {
 
 func (s *MatchService) FindMatches(
 	pagination helpers.Pagination,
-) (*MatchPagination, error) {
+	tournamentID uint,
+) ([]models.Match, int64, error) {
+
+	offset := (pagination.Page - 1) * pagination.PageSize
 
 	matches, totalCount, err := s.MatchRepository.FindAll(
-		pagination.Offset,
+		offset,
 		pagination.PageSize,
+		pagination.Search,
+		tournamentID,
 	)
 
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	pagination.SetTotal(totalCount)
-
-	return &MatchPagination{
-		Data:       matches,
-		Pagination: pagination,
-	}, nil
+	return matches, totalCount, nil
 }
 
 func (s *MatchService) FindMatchByID(id uint) (*models.Match, error) {
